@@ -1,0 +1,31 @@
+@page {
+    margin: 0cm;
+}
+
+img {
+    width: 150px;
+    margin:0px;
+    margin: 0.5cm;
+    
+}
+
+h1{
+    margin-top: 0.5cm;
+    margin-left: 1.3cm;
+    color: #B18904;
+}
+
+h2, p {
+    margin-left: 1.5cm;
+    margin-right: 1cm;
+}
+
+table {
+    margin: 1cm;
+    border-collapse: separate;
+ }
+ th, td {
+    border: 0.5 solid #555;
+    border-top-right-radius: 0.5px;
+    padding: 0.2em;
+ }
