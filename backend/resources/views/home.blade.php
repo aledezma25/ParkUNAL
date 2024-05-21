@@ -23,6 +23,7 @@
                                     <th scope="col">Marca</th>
                                     <th scope="col">Hora de Salida</th>
                                     <th scope="col">Placa</th>
+                                    <th scope="col">Vigilante</th>
                                     <th scope="col">Acciones</th>
                                 </tr>
                             </thead>
@@ -30,7 +31,9 @@
                                 @foreach($records as $record)
                                 <tr>
                                     <td>{{ $record->id }}</td>
-                                    <td>{{ $record->user->name }}</td>
+                                    <td>{{ $record->user->name }}</td>    
+                                    {{-- <td>{{ $record->vehicle->idUser}}</td> --}}
+
                                     <td>{{ $record->user->last_name }}</td>
                                     <td>{{ $record->user->document_number }}</td>
                                     <td>{{ $record->user->phone_number }}</td>
@@ -38,11 +41,11 @@
                                     <td>{{ $record->entryDate }}</td>
                                     {{-- tipo de vehiculo --}}
                                     <td>{{ $record->vehicle->type->name }}</td>
-
                                     <td>{{ $record->vehicle->color }}</td>
                                     <td>{{ $record->vehicle->mark }}</td>
                                     <td>{{ $record->exitTime }}</td>
                                     <td>{{ $record->vehicle->plate }}</td>
+                                    <td>{{ $record->nameAdmin }}</td>
 
                                     <td>
                                         <form action="{{ route('records.destroy', $record->id) }}" method="POST">

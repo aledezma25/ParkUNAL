@@ -18,6 +18,7 @@ class CreateTypesTable extends Migration
             $table->string('name');
             $table->string('image');
             $table->string('description');
+            $table->integer('spaces');
             $table->timestamps();
         });
     }

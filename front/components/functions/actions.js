@@ -42,7 +42,7 @@ export const getCurrentUser = async () => {
 }
 
 // funcion para editar el usuario
-export const updateProfile = async (id, newName, newLastName, newPhone) => {
+export const updateProfile = async (id, newName, newLastName, newPhone, newDocument) => {
   try {
     const data = {};
 
@@ -56,6 +56,9 @@ export const updateProfile = async (id, newName, newLastName, newPhone) => {
 
     if (newPhone !== '') {
       data.phone_number = newPhone;
+    }
+    if (newDocument !== '') {
+      data.document_number = newDocument;
     }
 
     const response = await axios.post(
@@ -276,3 +279,69 @@ export const getVehicleById = async (vehicleId) => {
     return null;
   }
 };
+
+// funcion para editar un registro al momento de la salida
+export const updateExitRecord = async (recordId, exitData) => {
+  try {
+    const token = await AsyncStorage.getItem('token');
+    if (token) {
+      const response = await axios.put(`${BASE_URL}/api/records/${recordId}`, {
+        ...exitData, // Spread operator para enviar los datos de salida
+      }, {
+        headers: {
+          'Authorization': 'Bearer ' + token,
+        },
+      });
+      return response.data;
+    }
+    return { success: false, message: 'No se ha podido obtener el token' };
+  } catch (error) {
+    console.error('Error al editar el registro de salida:', error);
+    return { success: false, message: 'Error de red' };
+  }
+}
+
+// funcion para obtener el ultimo registro de entrada
+export const getLastEntryRecord = async (vehicleId) => {
+  try {
+    const response = await axios.get(`${BASE_URL}/api/records/last/${vehicleId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener el último registro de entrada:', error);
+    return null;
+  }
+}
+
+// funcion para actualizar los espacios disponibles por tipo de vehiculo y pasando el token
+export const updateSpaces = async (typeId, newSpaces) => {
+  try {
+    const token = await AsyncStorage.getItem('token');
+    if (token) {
+      const response = await axios.put(`${BASE_URL}/api/types/spaces/${typeId}`, {
+        spaces: newSpaces,
+      }, {
+        headers: {
+          'Authorization': 'Bearer ' + token,
+        },
+      });
+      return response.data;
+    }
+    return { success: false, message: 'No se ha podido obtener el token' };
+  } catch (error) {
+    console.error('Error al actualizar los espacios disponibles:', error);
+    return { success: false, message: 'Error de red' };
+  }
+}
+
+
+
+//funcion para obtener el tipo de vehiculo por id
+export const getVehicleTypeById = async (typeId) => {
+  try {
+    const response = await axios.get(`${BASE_URL}/api/types/${typeId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener el tipo de vehículo:', error);
+    return null;
+  }
+}

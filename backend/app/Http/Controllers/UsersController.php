@@ -169,6 +169,9 @@ class UsersController extends Controller
         if ($request->has('phone_number')) {
             $user->phone_number = $request->input('phone_number');
         }
+        if ($request->has('document_number')) {
+            $user->document_number = $request->input('document_number');
+        }
 
         // Guardar los cambios en la base de datos
         $user->save();

@@ -23,7 +23,9 @@ class CreateRecordsTable extends Migration
             $table->foreign('idVehicle')->references('id')->on('vehicles');
             $table->unsignedbigInteger('idUser')->nullable();
             $table->foreign('idUser')->references('id')->on('users');
+            $table->string('nameAdmin');
             $table->timestamps();
+
         });
     }
 

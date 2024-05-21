@@ -26,10 +26,9 @@ class HomeController extends Controller
      */
     public function index()
     {
-        // Obtener todos los registros
-        $records = Record::with('user', 'vehicle')->get();
+        // Obtener todos los registros ordenados por ID de forma descendente
+        $records = Record::with('user', 'vehicle')->orderByDesc('id')->get();
 
         return view('home', compact('records'));
     }
-    
 }

@@ -56,12 +56,14 @@ const VehiculosQRScreen = () => {
       {userLoggedIn ? (
         <View>
           {userRole === 1 ? (
-            <LectorQR />
+            <View >
+              <LectorQR />
+            </View>
 
           ) : userRole === 2 ? (
             <VehiculosQR />
           ) : (
-            <Text>Role no reconocido</Text>
+            <Loading isVisible={true} text="Cargando..." />
           )}
         </View>
       ) : (
@@ -115,6 +117,13 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
   },
+  // qrcontainer: {
+  //   flex: 1,
+  //   justifyContent: "center",
+  //   alignItems: "center",
+  //   width: "100%",
+    
+  // },
 
 
 });

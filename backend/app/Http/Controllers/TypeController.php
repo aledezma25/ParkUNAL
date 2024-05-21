@@ -56,7 +56,7 @@ class TypeController extends Controller
             $type->image = $destinationPath . $fileName;
         }
         $type->description = $request->description;
-
+        $type->spaces = $request->spaces;
         $type->save();
         return redirect()->route('types.index')->with('success', 'type creado exitosamente!');
     }
@@ -67,9 +67,10 @@ class TypeController extends Controller
      * @param  \App\Models\Type  $type
      * @return \Illuminate\Http\Response
      */
-    public function show(Type $type)
+    public function show($id)
     {
-        //
+        $type = Type::find($id);
+       return response()->json($type);
     }
 
     /**
@@ -103,6 +104,7 @@ class TypeController extends Controller
             $type->image = $destinationPath . $fileName;
         }
         $type->description = $request->description;
+        $type->spaces = $request->spaces;
 
         $type->save();
         return redirect()->route('types.index')->with('success', 'type editado exitosamente!');
@@ -121,23 +123,13 @@ class TypeController extends Controller
         return redirect()->route('types.index')->with('success', 'type eliminado exitosamente!');
     }
 
-    // public function generarExcel()
-    // {
-    //     return Excel::download(new CategoriasExport, 'categorias.xlsx');
-    // }
-
-    // public function grafica()
-    // {
-    //     // Obtén todas las categorías con la cantidad de productos en cada una
-    //     $categoriesWithCount = Category::withCount('products')->get();
-
-    //     return view('admin.products.categories.grafica', compact('categoriesWithCount'));
-    // }
-
-    // public function generarPDF()
-    // {
-    //     $categories = Category::all();
-    //     $pdf = Pdf::loadView('admin.products.categories.pdf', \compact('categories'));
-    //     return $pdf->stream();
-    // }
+    //Funcion para actualizar el espacio de un tipo de vehiculo
+    public function updateSpaces(Request $request, $id)
+    {
+        $type = Type::find($id);
+        $type->spaces = $request->spaces;
+        $type->save();
+        return response()->json($type);
+    }
+    
 }

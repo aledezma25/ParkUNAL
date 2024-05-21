@@ -1,15 +1,16 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
-import InicioParkUN from '../home/InicioParkUN'
+// InicioScreen.js
+import React, { useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import InicioParkUN from '../home/InicioParkUN';
+import CuposIcon from '../internos/CuposIcon';
 
 const InicioScreen = () => {
   return (
     <View>
       <InicioParkUN />
+      <CuposIcon/>
     </View>
-  )
-}
+  );
+};
 
-export default InicioScreen
-
-const styles = StyleSheet.create({})
+export default InicioScreen;

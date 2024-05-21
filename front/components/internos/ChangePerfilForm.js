@@ -6,10 +6,11 @@ import { isEmpty } from 'lodash';
 import { updateProfile } from '../functions/actions';
 import axios from 'axios';
 
-export default function ChangeNameForm({id, name, lastName, phone_number, setShowModal, toastRef, onReload}) {
+export default function ChangeNameForm({id, name, lastName, phone_number, document_number, setShowModal, toastRef, onReload}) {
     const [newName, setNewName] = useState('');
     const [newLastName, setNewLastName] = useState('');
     const [newPhone, setNewPhone] = useState('');
+    const [newDocument, setNewDocument] = useState('');
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     
@@ -23,7 +24,7 @@ export default function ChangeNameForm({id, name, lastName, phone_number, setSho
             return;
         }
         setLoading(true);
-        const result = await updateProfile(parsedId, newName, newLastName, newPhone);
+        const result = await updateProfile(parsedId, newName, newLastName, newPhone, newDocument);
         setLoading(false);
 
         if (result) {
@@ -76,6 +77,20 @@ export default function ChangeNameForm({id, name, lastName, phone_number, setSho
                 color: '#c2c2c2',
             }}
         />
+        <Input
+            placeholder='Documento de identidad'
+            containerStyle={styles.input}
+            defaultValue={document_number || ''}
+            onChange={(e) => setNewDocument(e.nativeEvent.text)}
+            errorMessage={error}
+            keyboardType='numeric'
+            rightIcon={{
+                type: 'material-community',
+                name: 'card-account-details',
+                color: '#c2c2c2',
+            }}
+        />
+        
 
         <Button
             title='Actualizar perfil'

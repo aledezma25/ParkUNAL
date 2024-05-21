@@ -68,5 +68,15 @@ Route::get('/records', [RecordController::class, 'index']);
 //ruta para obtener un record por id
 Route::get('/records/{id}', [RecordController::class, 'show']);
 
+//ruta para actualizar un record
+Route::put('/records/{id}', [RecordController::class, 'update']);
 
 
+//ruta para para obtener la última entrada del vehículo 
+Route::get('/records/last/{id}', [RecordController::class, 'lastRecord']);
+
+//ruta para actualizar el espacio de un tipo de vehículo
+Route::put('/types/spaces/{id}', [TypeController::class, 'updateSpaces']);
+
+// ruta para obtener el tipo de vehículo por id
+Route::get('/types/{id}', [TypeController::class, 'show']);

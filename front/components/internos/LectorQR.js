@@ -1,9 +1,29 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Text, View, StyleSheet, Button, Modal, TouchableOpacity, Animated, Easing } from 'react-native';
-import { BarCodeScanner } from 'expo-barcode-scanner';
-import { useCallback } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
-import { fillEntryRecord, getCurrentUser, getVehicleById } from '../functions/actions';
+import React, { useState, useEffect, useRef } from "react";
+import {
+  Text,
+  View,
+  StyleSheet,
+  Button,
+  Modal,
+  TouchableOpacity,
+  Animated,
+  Easing,
+} from "react-native";
+import { BarCodeScanner } from "expo-barcode-scanner";
+import { useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import {
+  fillEntryRecord,
+  getCurrentUser,
+  getVehicleById,
+  getLastEntryRecord,
+  updateExitRecord,
+  getVehicleTypeById,
+} from "../functions/actions";
+import FocusSymbol from "./FocusSymbol";
+//importar switch
+import { Switch } from "react-native";
+import { updateSpaces, getVehicleTypes } from "../functions/actions";
 
 const LectorQR = () => {
   const [hasPermission, setHasPermission] = useState(null);
@@ -12,8 +32,8 @@ const LectorQR = () => {
   const [loading, setLoading] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [successMessage, setSuccessMessage] = useState(null); // Estado para mostrar mensaje de éxito
-
-  const scannerSize = useRef(new Animated.Value(300)).current; // Tamaño inicial del escáner
+  const [registerMode, setRegisterMode] = useState("entry"); // Por defecto, se registra una entrada
+  const [errorMessage, setErrorMessage] = useState("");
 
   useFocusEffect(
     useCallback(() => {
@@ -30,14 +50,25 @@ const LectorQR = () => {
       const response = await getVehicleById(vehicleId);
       return response;
     } catch (error) {
-      console.error('Error al obtener el vehículo:', error);
+      console.error("Error al obtener el vehículo:", error);
+      return null;
+    }
+  };
+
+  // funcion para obtener el nombre del usuario actual
+  const obtenerUsuarioActual = async () => {
+    try {
+      const response = await getCurrentUser();
+      return response.name;
+    } catch (error) {
+      console.error("Error al obtener el usuario actual:", error);
       return null;
     }
   };
 
   const requestCameraPermission = async () => {
     const { status } = await BarCodeScanner.requestPermissionsAsync();
-    setHasPermission(status === 'granted');
+    setHasPermission(status === "granted");
   };
 
   const handleBarCodeScanned = ({ type, data }) => {
@@ -45,69 +76,128 @@ const LectorQR = () => {
       setScanned(true);
       setScannedData(data);
       setShowConfirmation(true);
-      animateScanner(); // Llamar a la función para animar el escáner
     }
-  };
-
-  const animateScanner = () => {
-    Animated.sequence([
-      Animated.timing(scannerSize, {
-        toValue: 550, // Tamaño más grande al escanear
-        duration: 500,
-        easing: Easing.linear,
-        useNativeDriver: false,
-      }),
-      Animated.timing(scannerSize, {
-        toValue: 500, // Volver al tamaño original
-        duration: 500,
-        easing: Easing.linear,
-        useNativeDriver: false,
-      }),
-    ]).start();
   };
 
   const confirmRegistration = async () => {
     try {
-      // Obtener la fecha actual
+      const types = await getVehicleTypes(scannedData);
+      // Obtener la fecha y hora actuales
       const currentDate = new Date();
-      const entryDate = currentDate.toISOString().split('T')[0];
+      const entryDate = currentDate.toISOString().split("T")[0];
+      const entryTime = currentDate.toLocaleTimeString("en-US", {
+        hour12: false,
+      });
 
-      // Obtener la hora actual 
-      const entryTime = currentDate.toLocaleTimeString('en-US', { hour12: false });
-      // Obtener el vehículo por id
+      // Obtener el vehículo escaneado
       const vehicle = await obtenerVehiculo(scannedData);
       if (!vehicle) {
-        console.error('No se ha encontrado el vehículo');
+        console.error("No se encontró el vehículo escaneado");
         return;
       }
 
+      let response;
+      let responseSpaces;
 
-      // Llamamos a la función fillEntryRecord con los datos necesarios
-      const response = await fillEntryRecord({
-        entryDate: entryDate,
-        exitDate: null, // Puedes ajustar según tus necesidades
-        entryTime: entryTime,
-        exitTime: null, // Puedes ajustar según tus necesidades
-        idVehicle: scannedData, // El id capturado del código QR
-        //id del usuario pero respecto al vehiculo
-        idUser: vehicle.idUser,
-      });
-      
+      if (registerMode === "entry") {
+        // Verificar si ya existe una entrada sin fecha de salida para este vehículo
+        const lastEntry = await getLastEntryRecord(scannedData);
+        if (lastEntry && !lastEntry.exitDate && !lastEntry.exitTime) {
+          // Mostrar mensaje de error
+          setErrorMessage("Ya existe una entrada pendiente para este vehículo");
+
+          // Programar la limpieza del mensaje después de 3 segundos (3000 milisegundos)
+          setTimeout(() => {
+            setErrorMessage("");
+          }, 3000);
+
+          return;
+        }
+        // Registro de entrada
+        response = await fillEntryRecord({
+          entryDate: entryDate,
+          exitDate: null,
+          entryTime: entryTime,
+          exitTime: null,
+          idVehicle: scannedData,
+          idUser: vehicle.idUser,
+          nameAdmin: await obtenerUsuarioActual(),
+        });
+        const vehicleType = await getVehicleTypeById(vehicle.idTypes);
+        if (!vehicleType) {
+          console.error("No se encontró el tipo de vehículo");
+          return; // O maneja el error de otra forma según tu flujo
+        }
+
+        // Calcular los nuevos espacios
+        const newSpaces = vehicleType.spaces - 1; // Restar un espacio
+
+
+        // Actualizar los espacios disponibles en la base de datos con la funcion updateSpaces
+        responseSpaces = await updateSpaces(vehicle.idTypes, newSpaces);
+
+      } else {
+
+        // Registro de salida (actualización de la última entrada) 
+        const lastEntry = await getLastEntryRecord(scannedData); // Implementa esta función para obtener la última entrada del vehículo
+        if (!lastEntry) {
+          //mensaje de que aun no se ha registrado una entrada
+          setErrorMessage("No se ha registrado una entrada para este vehículo");
+          setTimeout(() => {
+            setErrorMessage("");
+          }, 3000);
+          return;
+        }
+        
+        if (lastEntry.exitDate && lastEntry.exitTime) {
+          // Mostrar mensaje de error si ya existe una salida registrada
+          setErrorMessage("Este vehículo ya ha registrado una salida");
+          setTimeout(() => {
+            setErrorMessage("");
+          }, 3000);
+          return;
+        }
+
+        // Actualizar la entrada con la fecha y hora de salida
+        response = await updateExitRecord(lastEntry.id, {
+          ...lastEntry,
+          exitDate: entryDate,
+          exitTime: entryTime,
+          nameAdmin: await obtenerUsuarioActual(),
+        });
+        const vehicleType = await getVehicleTypeById(vehicle.idTypes);
+        if (!vehicleType) {
+          console.error("No se encontró el tipo de vehículo");
+          return; // O maneja el error de otra forma según tu flujo
+        }
+
+        // Calcular los nuevos espacios
+        const newSpaces = vehicleType.spaces + 1; // Sumar un espacio
+
+
+        // Actualizar los espacios disponibles en la base de datos con la funcion updateSpaces
+        responseSpaces = await updateSpaces(vehicle.idTypes, newSpaces);
+      }
+
       // Mostrar mensaje de éxito
-      setSuccessMessage('Registro de entrada realizado con éxito');
+      setSuccessMessage(
+        registerMode === "entry"
+          ? "Registro de entrada realizado con éxito"
+          : "Registro de salida realizado con éxito"
+      );
 
       // Reiniciar estados y ocultar modal después de unos segundos
       setTimeout(() => {
         setScanned(false);
         setShowConfirmation(false);
-        setSuccessMessage(null); // Limpiar mensaje de éxito
+        setSuccessMessage(null);
       }, 1000);
+      setErrorMessage("");
     } catch (error) {
-      console.error('Error al llenar el registro de entrada:', error);
-      // Puedes mostrar un mensaje de error aquí si lo necesitas
+      console.error("Error al llenar el registro:", error);
     }
   };
-  
+
   const cancelRegistration = () => {
     setScanned(false); // Reiniciar el estado de scanned al cancelar el registro
     setShowConfirmation(false); // Ocultar el modal de confirmación
@@ -125,29 +215,78 @@ const LectorQR = () => {
       <View style={styles.titleContainer}>
         <Text style={styles.titleText}>Escanea el código QR</Text>
       </View>
-      <Modal visible={loading} transparent={true}>
-        <View style={styles.modalContainer}>
+
+      <View style={styles.modeSwitch}>
+        <Text style={styles.switchText}>Registro:</Text>
+        <TouchableOpacity
+          onPress={() => setRegisterMode("entry")}
+          style={[
+            styles.switchOption,
+            registerMode === "entry" && styles.switchOptionSelected,
+          ]}
+        >
+          <Text
+            style={[
+              styles.switchOptionText,
+              registerMode === "entry" && styles.switchOptionTextSelected,
+            ]}
+          >
+            Entrada
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => setRegisterMode("exit")}
+          style={[
+            styles.switchOption,
+            registerMode === "exit" && styles.switchOptionSelected,
+          ]}
+        >
+          <Text
+            style={[
+              styles.switchOptionText,
+              registerMode === "exit" && styles.switchOptionTextSelected,
+            ]}
+          >
+            Salida
+          </Text>
+        </TouchableOpacity>
+      </View>
+      {errorMessage ? (
+        <View style={styles.errorMessage}>
+          <Text style={styles.errorText}>{errorMessage}</Text>
         </View>
+      ) : null}
+      <Modal visible={loading} transparent={true}>
+        <View style={styles.modalContainer}></View>
       </Modal>
       <Modal visible={showConfirmation} transparent={true}>
         <View style={styles.modalContainer}>
-          <Text style={styles.modalText}>¿Deseas registrar la lectura del código QR?</Text>
+          <Text style={styles.modalText}>
+            ¿Deseas registrar la lectura del código QR?
+          </Text>
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.confirmButton} onPress={confirmRegistration}>
+            <TouchableOpacity
+              style={styles.confirmButton}
+              onPress={confirmRegistration}
+            >
               <Text style={styles.buttonText}>Confirmar</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.cancelButton} onPress={cancelRegistration}>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={cancelRegistration}
+            >
               <Text style={styles.buttonText}>Cancelar</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
       <View style={styles.scannerContainer}>
-        <Animated.View style={[styles.barcodeScanner, { height: scannerSize, width: scannerSize }]}>
+        <Animated.View style={[styles.barcodeScanner, { flex: 1 }]}>
           <BarCodeScanner
             onBarCodeScanned={handleBarCodeScanned}
             style={StyleSheet.absoluteFillObject}
           />
+          <FocusSymbol />
         </Animated.View>
       </View>
       {successMessage && (
@@ -162,73 +301,109 @@ const LectorQR = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'flex-start',
+    alignItems: "center",
+    justifyContent: "flex-start",
     paddingTop: 50,
   },
   titleContainer: {
-    marginBottom: 20,
+    padding: 20,
   },
   titleText: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   scannerContainer: {
     flex: 1,
-    alignItems: 'center',
-    paddingTop: 20,
-
+    alignItems: "center",
   },
   barcodeScanner: {
-    height: 500,
+    height: 300,
     width: 500,
   },
   modalContainer: {
     flex: 1,
-    justifyContent: 'center',
+    // justifyContent: "center",
     padding: 20,
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
     paddingTop: 550,
   },
   modalText: {
-    color: 'white',
+    color: "white",
     fontSize: 18,
     marginBottom: 20,
-    textAlign: 'center',
+    textAlign: "center",
+    
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '80%',
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "80%",
   },
   confirmButton: {
-    backgroundColor: '#94b43b',
+    backgroundColor: "#94b43b",
     padding: 10,
     borderRadius: 10,
   },
   cancelButton: {
-    backgroundColor: '#e74c3c',
+    backgroundColor: "#e74c3c",
     padding: 10,
     borderRadius: 10,
   },
   buttonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
   },
   successMessage: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 20,
     left: 20,
     right: 20,
-    backgroundColor: 'green',
+    backgroundColor: "green",
     padding: 10,
     borderRadius: 5,
   },
   successText: {
-    color: 'white',
-    textAlign: 'center',
+    color: "white",
+    textAlign: "center",
     fontSize: 16,
+  },
+  modeSwitch: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  switchText: {
+    marginRight: 10,
+    fontSize: 16,
+  },
+  switchOption: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 20,
+    marginRight: 10,
+  },
+  switchOptionSelected: {
+    backgroundColor: "#94b43b", // Color de fondo cuando está seleccionado
+    borderColor: "#94b43b", // Color de borde cuando está seleccionado
+  },
+  switchOptionText: {
+    fontSize: 14,
+  },
+  switchOptionTextSelected: {
+    color: "white", // Color del texto cuando está seleccionado
+  },
+  errorMessage: {
+    backgroundColor: "red",
+    padding: 10,
+    borderRadius: 5,
+    marginVertical: 10,
+  },
+  errorText: {
+    color: "white",
+    textAlign: "center",
   },
 });
 

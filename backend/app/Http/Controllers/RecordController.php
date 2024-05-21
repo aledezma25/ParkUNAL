@@ -24,6 +24,7 @@ class RecordController extends Controller
         $record->exitTime = $request->exitTime;
         $record->idVehicle = $request->idVehicle;
         $record->idUser = $request->idUser;
+        $record->nameAdmin = $request->nameAdmin;
         $record->save();
         return json_decode($record, true);
 
@@ -44,8 +45,10 @@ class RecordController extends Controller
         $record->exitTime = $request->exitTime;
         $record->idVehicle = $request->idVehicle;
         $record->idUser = $request->idUser;
+        $record->nameAdmin = $request->nameAdmin;
         $record->save();
-        return $record;
+        return json_decode($record, true);
+        
     }
 
     public function destroy($id)
@@ -54,4 +57,12 @@ class RecordController extends Controller
         $record->delete();
         return redirect('/home');
     }
+
+    public function lastRecord($id)
+    {
+        //ultimo record de un vehiculo
+        $record = Record::where('idVehicle', $id)->orderBy('id', 'desc')->first();
+        return json_decode($record, true);
+    }
+    
 }
