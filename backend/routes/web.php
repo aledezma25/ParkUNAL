@@ -8,6 +8,8 @@ use App\Http\Controllers\VehicleController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\RecordController;
+use App\Http\Controllers\VisitorController;
+use App\Models\Visitor;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
 
 
@@ -53,6 +55,11 @@ Route::middleware(['auth', 'role:administrador'])->group(function () {
     Route::delete("usuarios/{id}", [UsersController::class, 'destroy'])->name('usuarios.destroy');
     Route::put("usuarios/{id}", [UsersController::class, 'update'])->name('usuarios.update');
     Route::get("create", [UsersController::class, 'create'])->name('create');
+
+    Route::post("usuarios", [UsersController::class, 'storeWeb'])->name('usuarios.storeWeb');
+    Route::put("usuarios/{id}", [UsersController::class, 'updateWeb'])->name('usuarios.updateWeb');
+
+
    
     
 
@@ -62,6 +69,8 @@ Route::middleware(['auth', 'role:administrador'])->group(function () {
     Route::get("roles/{id}", [RoleController::class, 'edit'])->name('roles.edit');
     Route::delete("roles/{id}", [RoleController::class, 'destroy'])->name('roles.destroy');
     Route::put("roles/{id}", [RoleController::class, 'update'])->name('roles.update');
+    //ruta para ir a la vista de crear roles
+    Route::get("createRole", [RoleController::class, 'create'])->name('createRole');
 
     //gestion de types
     Route::get('/types', [TypeController::class, 'index'])->name('types.index');
@@ -69,6 +78,9 @@ Route::middleware(['auth', 'role:administrador'])->group(function () {
     Route::get("types/{id}", [TypeController::class, 'edit'])->name('types.edit');
     Route::delete("types/{id}", [TypeController::class, 'destroy'])->name('types.destroy');
     Route::put("types/{id}", [TypeController::class, 'update'])->name('types.update');
+
+    //ruta para ir a la vista de crear types
+    Route::get("createType", [TypeController::class, 'create'])->name('createType');
 
     //gestion de vehicles 
     Route::get('/vehicles', [VehicleController::class, 'index'])->name('vehicles.index');
@@ -78,11 +90,31 @@ Route::middleware(['auth', 'role:administrador'])->group(function () {
     Route::put("vehicles/{id}", [VehicleController::class, 'update'])->name('vehicles.update');
     Route::get("createVehi", [VehicleController::class, 'create'])->name('createVehi');
 
+    Route::post("vehicles", [VehicleController::class, 'storeWeb'])->name('vehicles.storeWeb');
+    Route::put("vehicles/{id}", [VehicleController::class, 'updateWeb'])->name('vehicles.updateWeb');
+    Route::delete("vehicles/{id}", [VehicleController::class, 'destroyWeb'])->name('vehicles.destroyWeb');
+
+
+
+
+
     //gestion de records
-    Route::get('/records', [RecordController::class, 'index'])->name('records.index');
+    Route::get('/records', [RecordController::class, 'index'])->name('records.index'); 
     Route::post("records", [RecordController::class, 'store'])->name('records.store');
     Route::get("records/{id}", [RecordController::class, 'edit'])->name('records.edit');
     Route::delete("records/{id}", [RecordController::class, 'destroy'])->name('records.destroy');
+    
+    //Ruta ir a la vista de registrar visitantes
+    Route::get("/records", [VisitorController::class, 'registervisited'])->name('records.registervisited');
+    //Ruta para registrar visitantes
+    Route::get("/recordsvisitor", [VisitorController::class, 'storevisited'])->name('recordsvisitor');
+    
+    // // Ruta para editar un visitante
+    // Route::get('/records/{id}/edit', [VisitorController::class, 'edit'])->name('records.edit');
+
+    // // Ruta para actualizar un visitante
+    // Route::put('/records/{id}', [VisitorController::class, 'update'])->name('records.update');
+
     
     
 });

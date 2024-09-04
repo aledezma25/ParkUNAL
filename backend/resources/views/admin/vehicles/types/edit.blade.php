@@ -1,57 +1,52 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.app')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <link href="{{ asset('css/style.css') }}" rel="stylesheet">
-    <title>Editar Tipo</title>
-</head>
-
-<body>
-    <div class="container">
-        <a href="{{ route('types.index') }}" class="btn btn-primary">Regresar</a>
-        <div class="container text-center">
-            <h2>Editar Tipo de vehiculo </h2>
-            <div class="card-body">
-                <form action="{{ route('types.update', $type->id) }}" method="POST"
-                    enctype="multipart/form-data">
-                    @csrf
-                    @method('PUT')
-                    <div class="row mb-3">
-                        <label for="name" class="col-md-4 col-form-label text-md-end">{{ __('Nombre') }}</label>
-
-                        <div class="col-md-6">
-                            <input type="text" name="name" id="name" placeholder="Nombre: "
-                                class="form-control" value="{{ $type->name }}">
-                        </div>
+@section('content')
+<div class="container mt-5" style="max-width: 800px;">
+    <a href="{{ route('types.index') }}" class="btn btn-secondary mb-4" style="padding: 10px 20px; font-weight: bold; border-radius: 50px; background-color: #6c757d;">Regresar</a>
+    
+    <div class="text-center mb-4">
+        <h1 style="font-weight: bold; color: #343a40;">Editar Tipo de Vehículo</h1>
+    </div>
+    
+    <div class="card shadow-sm" style="border-radius: 10px; background-color: #f8f9fa;">
+        <div class="card-body p-4">
+            <form action="{{ route('types.update', $type->id) }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
+                
+                <div class="mb-3 row">
+                    <label for="name" class="col-md-4 col-form-label text-md-end" style="font-weight: bold; color: #495057;">Nombre</label>
+                    <div class="col-md-6">
+                        <input type="text" name="name" id="name" class="form-control" placeholder="Nombre: " value="{{ $type->name }}" style="border-radius: 8px; border-color: #ced4da;">
                     </div>
-                    <div class="row mb-3">
-                        <label for="image" class="col-md-4 col-form-label text-md-end">{{ __('Imagen') }}</label>
+                </div>
+                
+                <div class="mb-3 row">
+                    <label for="image" class="col-md-4 col-form-label text-md-end" style="font-weight: bold; color: #495057;">Imagen</label>
+                    <div class="col-md-6">
+                        <input type="file" name="image" id="image" class="form-control" style="border-radius: 8px; border-color: #ced4da;" placeholder="Adjuntar imagen del tipo de vehículo">
+                    </div>
+                </div>
+                
+                <div class="mb-3 row">
+                    <label for="description" class="col-md-4 col-form-label text-md-end" style="font-weight: bold; color: #495057;">Descripción</label>
+                    <div class="col-md-6">
+                        <input type="text" name="description" id="description" class="form-control" placeholder="Descripción: " value="{{ $type->description }}" style="border-radius: 8px; border-color: #ced4da;">
+                    </div>
+                </div>
 
-                        <div class="col-md-6">
-                            <input type="file" name="image" id="image"
-                                class="appearence-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline form-control"
-                                placeholder="Adjuntar imagen del tipo de vehículo">
-                        </div>
+                <div class="mb-3 row">
+                    <label for="spaces" class="col-md-4 col-form-label text-md-end" style="font-weight: bold; color: #495057;">Espacios</label>
+                    <div class="col-md-6">
+                        <input type="number" name="spaces" id="spaces" class="form-control" placeholder="Espacios: " value="{{ $type->spaces }}" style="border-radius: 8px; border-color: #ced4da;">
                     </div>
-                    <div class="row mb-3">
-                        <label for="description" class="col-md-4 col-form-label text-md-end">{{ __('Descripción') }}</label>
-                        <div class="col-md-6">
-                            <input type="text" name="description" id="description" placeholder="Descripción: "
-                                class="form-control" value="{{ $type->description }}">
-                        </div>
-                    </div>
-                    <br>
-                    <button type="submit" class="btn btn-primary">Editar</button>
-                    <br><br>
-                </form>
-            </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-success" style="padding: 10px 30px; font-size: 16px; border-radius: 50px;">Editar</button>
+                </div>
+            </form>
         </div>
     </div>
-</body>
-
-</html>
+</div>
+@endsection

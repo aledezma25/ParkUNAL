@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Role;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
+use Illuminate\Support\Facades\Storage;
 
 class UsersController extends Controller
 {
@@ -56,6 +57,21 @@ class UsersController extends Controller
         $user->save();
         // return redirect()->route('usuarios.index')->with('success', 'Usuario creado exitosamente!');
         return json_encode(["success" => true, "message" => "Usuario creado exitosamente!"]);
+    }
+    public function storeWeb(Request $request)
+    {
+        $user = new User();
+        $user->name = $request->name;
+        $user->last_name = $request->last_name;
+        $user->document_number = $request->document_number;
+        $user->phone_number = $request->phone_number;
+        $user->email = $request->email;
+        $user->address = $request->address;
+        $user->role_id = 2;
+        $user->password = bcrypt($request->password);
+        $user->save();
+        return redirect()->route('usuarios.index')->with('success', 'Usuario creado exitosamente!');
+        // return json_encode(["success" => true, "message" => "Usuario creado exitosamente!"]);
     }
 
     /**
@@ -116,6 +132,20 @@ class UsersController extends Controller
         $user->save();
         // return redirect()->route('usuarios.index')->with('success', 'Usuario editado exitosamente!');
         return response()->json(["success" => true, "message" => "Usuario editado exitosamente!"]);
+    }
+    public function updateWeb(Request $request, $id)
+    {
+        $user = User::find($id);
+        $user->name = $request->name;
+        $user->last_name = $request->last_name;
+        $user->document_number = $request->document_number;
+        $user->phone_number = $request->phone_number;
+        $user->email = $request->email;
+        $user->address = $request->address;
+        $user->password = bcrypt($request->password);
+        $user->save();
+        return redirect()->route('usuarios.index')->with('success', 'Usuario editado exitosamente!');
+        // return response()->json(["success" => true, "message" => "Usuario editado exitosamente!"]);
     }
 
     /**
@@ -211,30 +241,60 @@ class UsersController extends Controller
     }
 
 
-    public function generarExcel()
-    {
-        return Excel::download(new UsuariosExport, 'usuarios.xlsx');
-    }
-
-    public function generarPDF()
-    {
-        $users = User::all();
-        $pdf = Pdf::loadView('admin.users.pdf', \compact('users'));
-        return $pdf->stream();
-    }
-
-    public function obtenerUsuariosporId($id)
-    {
-        
-    }
-
     //funcion para subir foto de perfil desde el front
-    public function uploadProfilePhoto(Request $request, $id)
+    public function upload(Request $request)
+
+{
+
+    // Validar la imagen
+    $request->validate([
+        'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:10048',
+    ]);
+
+    // Guardar la imagen en la carpeta "users/icons"
+    if ($request->hasFile('photo')) {
+        $file = $request->file('photo');
+        $destinationPath = 'users/icons';
+        $fileName = time() . '.' . $file->getClientOriginalExtension(); // Generar un nombre único
+        $request->file('photo')->move($destinationPath, $fileName);
+        $filePath = $destinationPath . "/" . $fileName;
+        
+        return response()->json([
+            'url' => ($filePath),
+            'fileName' => $fileName // Incluir el nombre del archivo en la respuesta
+        ], 200);
+    }
+
+    return response()->json(['error' => 'No se pudo cargar la imagen'], 400);
+}
+
+
+    //funcion para subir url a photoURL del usuario
+    public function uploadphoto(Request $request, $id)
     {
+        // Validar los datos de entrada, asegurarte de que sean válidos.
+
         $user = User::find($id);
-        $user->profile_photo_path = $request->profile_photo_path;
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Usuario no encontrado'
+            ], 404);
+        }
+
+        if ($request->has('photoURL')) {
+            $user->photoURL = $request->input('photoURL');
+        }
+
+        // Guardar los cambios en la base de datos
         $user->save();
-        return response()->json(["success" => true, "message" => "Foto de perfil actualizada exitosamente!"]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Foto actualizada correctamente',
+            'user' => $user
+        ]);
     }
     
 }

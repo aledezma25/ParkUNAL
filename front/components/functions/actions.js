@@ -145,40 +145,6 @@ catch (error) {
 }
 }
 
-//funcion para subir foto de perfil 
-
-// Función para subir la imagen al backend
-const uploadProfilePhoto = async (userId, photoURI) => {
-  try {
-    const formData = new FormData();
-    formData.append('profile_photo_path', {
-      uri: photoURI,
-      name: 'photo.jpg',
-      type: 'image/jpg',
-    });
-
-    const response = await axios.post(`${BASE_URL}/user/upload-photo/${userId}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-
-    if (response.data.success) {
-      console.log('Foto de perfil actualizada exitosamente!');
-      // Aquí podrías realizar alguna acción adicional si la actualización fue exitosa
-    }
-  } catch (error) {
-    // console.error('Error al subir la foto de perfil:', error);
-    // Manejar el error según sea necesario
-  }
-};
-
-// Llamada a la función de subida de imagen
-const userId = 123; // Reemplaza con el ID del usuario actual
-const photoURI = 'URI_DE_LA_IMAGEN_SELECCIONADA'; // Reemplaza con la URI de la imagen seleccionada
-
-uploadProfilePhoto(userId, photoURI);
-
 
 // función para guardar un nuevo vehículo y mandando el token
 export const addVehicle = async (vehicleData) => {
@@ -345,3 +311,67 @@ export const getVehicleTypeById = async (typeId) => {
     return null;
   }
 }
+
+
+//funcion agregar el campo photoURL de un usuario y pasando el token
+// funcion para editar direccion de usuario
+export const updatePhotoURL = async (id, photoURL) => {
+  try {
+    const data = {};
+
+    if (photoURL !== '') {
+      data.photoURL = photoURL;
+    }
+
+    const response = await axios.post(
+      `${BASE_URL}/api/users/${id}/uploadphoto`,
+      data
+    );
+
+    if (response.data.success) {
+      // La actualización del perfil fue exitosa
+      console.log('Foto actualizada correctamente');
+    } else {
+      // Hubo un error al actualizar el perfil
+      console.error('Error al actualizar la Foto: ', response.data.message);
+    }
+
+    return response.data;
+}
+catch (error) {
+    console.error('Error de red: ', error);
+}
+
+
+}
+
+//funcion para obtener los comentarios 
+export const getComments = async () => {
+  try {
+    const response = await axios.get(`${BASE_URL}/api/comments`);
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener los comentarios:', error);
+    return [];
+  }
+};
+
+//funcion para agregar un comentario pasando el token
+
+export const addComment = async (commentData) => {
+  try {
+    const token = await AsyncStorage.getItem('token');
+    if (token) {
+      const response = await axios.post(`${BASE_URL}/api/comments`, commentData, {
+        headers: {
+          'Authorization': 'Bearer ' + token,
+        },
+      });
+      return response.data;
+    }
+    return { success: false, message: 'No se ha podido obtener el token' };
+  } catch (error) {
+    console.error('Error al agregar el comentario:', error);
+    return { success: false, message: 'Error de red' };
+  }
+};

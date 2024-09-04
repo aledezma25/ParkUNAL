@@ -1,55 +1,60 @@
 @extends('layouts.app')
 
+@section('css')
+    <link href="https://cdn.datatables.net/2.1.3/css/dataTables.bootstrap5.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+@endsection
+
 @section('content')
 <div class="container">
-    <a href="/administrador" class="btn btn-primary">Regresar</a>
-    <div class="text-center">
-        <h2>Gestión de Roles</h2>
-    </div>
-    <div class="card">
-        <div class="card-body">
-            <form action="{{ route('roles.store') }}" method="POST">
-                @csrf
-                <div class="mb-3 row">
-                    <label for="name" class="col-md-4 col-form-label text-md-end">{{ __('Nombre') }}</label>
-                    <div class="col-md-6">
-                        <input type="text" name="name" id="name" placeholder="Nombre" class="form-control" required>
-                    </div>
-                </div>
-                <div class="text-center">
-                    <button type="submit" class="btn btn-primary">Crear</button>
-                </div>
-            </form>
-        </div>
+    <h2>Gestión de roles</h2>
+    <div class="container text-left">
+        <a href="/administrador" class="btn btn-primary">Regresar</a>
+
+        <a href="{{ route('createRole') }}" class="btn btn-success">Nuevo Rol</a>
     </div>
     <br>
-    <br>
-    <h2>Lista de Roles</h2>
-    <br>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">Nombre</th>
-                <th scope="col">Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($roles as $role)
-            <tr>
-                <td>{{ $role->id }}</td>
-                <td>{{ $role->name }}</td>
-                <td>
-                    <form action="{{ route('roles.destroy', $role->id) }}" method="POST">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger">Eliminar</button>
-                    </form>
-                    <a href="{{ route('roles.edit', $role->id) }}" class="btn btn-warning">Editar</a>
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
+    <div class="container">
+        <table id="rolesTable" class="table table-striped table-bordered shadow-lg mt-4">
+            <thead class="table-success">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($roles as $role)
+                <tr>
+                    <td>{{ $role->id }}</td>
+                    <td>{{ $role->name }}</td>
+                    <td>
+                        <a href="{{ route('roles.edit', $role->id) }}" class="btn btn-warning">Editar</a>
+                        <form action="{{ route('roles.destroy', $role->id) }}" method="POST" style="display:inline;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
 </div>
+@endsection
+
+@section('js')
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/2.1.3/js/dataTables.js"></script>
+    <script src="https://cdn.datatables.net/2.1.3/js/dataTables.bootstrap5.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#rolesTable').DataTable({
+                "lengthMenu": [[5, 10, 20, 50, -1], [5, 10, 20, 50, "All"]],
+                "order": [[ 0, "asc" ]]
+            });
+        });
+    </script>
 @endsection

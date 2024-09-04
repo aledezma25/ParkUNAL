@@ -107,12 +107,12 @@ const EditVehicleForm = ({ vehicle, setShowModal, toastRef, onReload }) => {
         onChangeText={(text) => handleInputChange('plate', text)}
         rightIcon={{
             type: 'material-community',
-            name: 'information',
+            name: 'card-text-outline',
             color: '#c2c2c2',
           }}
       />
         
-        <Input
+        {/* <Input
         style={styles.input}
         placeholder="Imagen"
         value={formData.image}
@@ -122,7 +122,7 @@ const EditVehicleForm = ({ vehicle, setShowModal, toastRef, onReload }) => {
             name: 'image',
             color: '#c2c2c2',
           }}
-        />
+        /> */}
 
       <Button
         title="Guardar Cambios"

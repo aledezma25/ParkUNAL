@@ -35,7 +35,7 @@ export default function LoginForm() {
             })
             .then((response) => {
                 Alert.alert('Bienvenido', 'Inicio de sesión correcto.');
-
+                
                 const token = response.data.token;
                 console.log('Su token es: ', {token});
                 

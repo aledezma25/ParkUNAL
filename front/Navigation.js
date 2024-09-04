@@ -13,6 +13,8 @@ import LoginScreen from './components/screens/account/LoginScreen';
 import RegisterScreen from './components/screens/account/RegisterScreen';
 import AccountScreen from './components/screens/account/AccountScreen';
 import Loading from './components/functions/Loading';
+import AddMessage from './components/internos/AddMessage';
+import Feed from './components/internos/Feed';
 
 const PerfilStackNavigator = createNativeStackNavigator();
 function HomeStack() {
@@ -27,6 +29,21 @@ function HomeStack() {
           headerShown: false,
           }}
         />
+        <PerfilStackNavigator.Screen
+        name="Feed"
+        component={Feed}
+        options={{
+          title: 'Publicaciones',
+        }}
+
+      />
+      <PerfilStackNavigator.Screen
+        name="AddMessage"
+        component={AddMessage}
+        options={{
+          title: 'Agregar Mensaje',
+        }}
+      />
     </PerfilStackNavigator.Navigator>
   
   );

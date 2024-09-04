@@ -7,7 +7,7 @@ use App\Http\Controllers\UsersController;
 use App\Http\Controllers\SecurityAuthController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\RecordController;
-
+use App\Http\Controllers\CommentsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,12 +23,15 @@ use App\Http\Controllers\RecordController;
 Route::get('/users/{id}', [UsersController::class, 'show']);
 
 // ruta para subir la imagen del usuario
-Route::post('/user/upload-photo', [UsersController::class, 'uploadProfilePhoto']);
+Route::post('/upload', [UsersController::class, 'upload']);
 
 Route::apiResource('/users', UsersController::class);
 //RUta para checkear si el email existe
 Route::get('/users/email/{email}', [UsersController::class, 'checkEmail']);
 Route::post('/users/{id}/updateprofile', [UsersController::class, 'updateProfile']);
+
+//ruta para subir url a photoURL del usuario
+Route::post('/users/{id}/uploadphoto', [UsersController::class, 'uploadphoto']);
 
 
 //ruta para obtener las types
@@ -80,3 +83,13 @@ Route::put('/types/spaces/{id}', [TypeController::class, 'updateSpaces']);
 
 // ruta para obtener el tipo de vehículo por id
 Route::get('/types/{id}', [TypeController::class, 'show']);
+
+//ruta para los comentarios
+Route::get('/comments', [CommentsController::class, 'index']);
+Route::post('/comments', [CommentsController::class, 'store']);
+Route::get('/comments/{id}', [CommentsController::class, 'show']);
+Route::put('/comments/{id}', [CommentsController::class, 'update']);
+Route::delete('/comments/{id}', [CommentsController::class, 'destroy']);
+//ruta para subir imagen
+Route::post('/comments/upload', [CommentsController::class, 'uploadImage']);
+

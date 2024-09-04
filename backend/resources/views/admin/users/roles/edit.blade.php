@@ -1,29 +1,31 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container">
-        <a href="{{ route('roles.index') }}" class="btn btn-primary">Regresar</a>
-        <div class="container text-center">
-            <h2>Editar categoria </h2>
-            <div class="card-body">
-                <form action="{{ route('roles.update', $role->id) }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    @method('PUT')
-                    <div class="row mb-3">
-                        <label for="name" class="col-md-4 col-form-label text-md-end">{{ __('Nombre') }}</label>
+<div class="container mt-5" style="max-width: 800px;">
+    <a href="{{ route('roles.index') }}" class="btn btn-secondary mb-4" style="padding: 10px 20px; font-weight: bold; border-radius: 50px; background-color: #6c757d;">Regresar</a>
+    
+    <div class="text-center mb-4">
+        <h1 style="font-weight: bold; color: #343a40;">Editar Rol</h1>
+    </div>
+    
+    <div class="card shadow-sm" style="border-radius: 10px; background-color: #f8f9fa;">
+        <div class="card-body p-4">
+            <form action="{{ route('roles.update', $role->id) }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
 
-                        <div class="col-md-6">
-                            <input type="text" name="name" id="name" placeholder="Nombre: "
-                                class="form-control" value="{{ $role->name }}">
-                        </div>
+                <div class="mb-3 row">
+                    <label for="name" class="col-md-4 col-form-label text-md-end" style="font-weight: bold; color: #495057;">Nombre</label>
+                    <div class="col-md-6">
+                        <input type="text" name="name" id="name" class="form-control" placeholder="Nombre" value="{{ $role->name }}" style="border-radius: 8px; border-color: #ced4da;">
                     </div>
-            </div>
-            <br>
-            <button type="submit" class="btn btn-primary">Editar</button>
-            <br><br>
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" class="btn btn-success" style="padding: 10px 30px; font-size: 16px; border-radius: 50px;">Editar</button>
+                </div>
             </form>
         </div>
     </div>
-
-
+</div>
 @endsection

@@ -1,82 +1,66 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.app')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <link href="{{ asset('css/style.css') }}" rel="stylesheet">
-    <title>Editar Usuarios</title>
-</head>
+@section('content')
+<div class="container mt-5" style="max-width: 800px;">
+    <a href="{{ route('usuarios.index') }}" class="btn btn-secondary mb-4" style="padding: 10px 20px; font-weight: bold; border-radius: 50px; background-color: #6c757d;">Regresar</a>
+    
+    <div class="text-center mb-4">
+        <h1 style="font-weight: bold; color: #343a40;">Editar usuario</h1>
+    </div>
+    
+    <div class="card shadow-sm" style="border-radius: 10px; background-color: #f8f9fa;">
+        <div class="card-body p-4">
+            <form action="{{ route('usuarios.updateWeb', $user->id) }}" method="POST">
+                @csrf
+                @method('PUT')
 
-<body>
-    <div class="container">
-        <a href="{{ route('usuarios.index') }}" class="btn btn-primary">Regresar</a>
-        <div class="text-center">
-            <h2>Editar usuario </h2>
-            <div class="card-body">
-                <form action="{{ route('usuarios.update', $user->id) }}" method="POST">
-                    @csrf
-                    @method('PUT')
-                    <div class="row mb-3">
-                        <label for="name" class="col-md-4 col-form-label text-md-end">{{ __('Nombre') }}</label>
-
-                        <div class="col-md-6">
-                            <input type="text" name="name" id="name" placeholder="Nombre: "
-                                class="form-control" value="{{ $user->name }}">
-                        </div>
+                <div class="mb-3 row">
+                    <label for="name" class="col-md-4 col-form-label text-md-end" style="font-weight: bold; color: #495057;">Nombre</label>
+                    <div class="col-md-6">
+                        <input type="text" name="name" id="name" class="form-control" placeholder="Nombre" value="{{ $user->name }}" style="border-radius: 8px; border-color: #ced4da;">
                     </div>
-                    <div class="row mb-3">
-                        <label for="last_name" class="col-md-4 col-form-label text-md-end">{{ __('Apellido') }}</label>
+                </div>
 
-                        <div class="col-md-6">
-                            <input type="text" name="last_name" id="last_name" placeholder="Apellido: "
-                                class="form-control" value="{{ $user->last_name }}">
-                        </div>
+                <div class="mb-3 row">
+                    <label for="last_name" class="col-md-4 col-form-label text-md-end" style="font-weight: bold; color: #495057;">Apellido</label>
+                    <div class="col-md-6">
+                        <input type="text" name="last_name" id="last_name" class="form-control" placeholder="Apellido" value="{{ $user->last_name }}" style="border-radius: 8px; border-color: #ced4da;">
                     </div>
-                    <div class="row mb-3">
-                        <label for="document_number"
-                            class="col-md-4 col-form-label text-md-end">{{ __('Cédula') }}</label>
+                </div>
 
-                        <div class="col-md-6">
-                            <input type="text" name="document_number" id="document_number" placeholder="Cédula: "
-                                class="form-control" value="{{ $user->document_number }}">
-                        </div>
+                <div class="mb-3 row">
+                    <label for="document_number" class="col-md-4 col-form-label text-md-end" style="font-weight: bold; color: #495057;">Cédula</label>
+                    <div class="col-md-6">
+                        <input type="text" name="document_number" id="document_number" class="form-control" placeholder="Cédula" value="{{ $user->document_number }}" style="border-radius: 8px; border-color: #ced4da;">
                     </div>
-            </div>
-            <div class="row mb-3">
-                <label for="address" class="col-md-4 col-form-label text-md-end">{{ __('Dirección') }}</label>
-
-                <div class="col-md-6">
-                    <input type="text" name="address" id="address" placeholder="Dirección: " class="form-control"
-                        value="{{ $user->address }}">
                 </div>
-            </div>
-            <div class="row mb-3">
-                <label for="phone_number" class="col-md-4 col-form-label text-md-end">{{ __('Telefono') }}</label>
 
-                <div class="col-md-6">
-                    <input type="text" name="phone_number" id="phone_number" placeholder="Telefono: "
-                        class="form-control" value="{{ $user->phone_number }}">
+                <div class="mb-3 row">
+                    <label for="address" class="col-md-4 col-form-label text-md-end" style="font-weight: bold; color: #495057;">Dirección</label>
+                    <div class="col-md-6">
+                        <input type="text" name="address" id="address" class="form-control" placeholder="Dirección" value="{{ $user->address }}" style="border-radius: 8px; border-color: #ced4da;">
+                    </div>
                 </div>
-            </div>
-            <div class="row mb-3">
-                <label for="email" class="col-md-4 col-form-label text-md-end">{{ __('Correo') }}</label>
 
-                <div class="col-md-6">
-                    <input type="email" name="email" id="email" placeholder="Email: " class="form-control"
-                        value="{{ $user->email }}">
+                <div class="mb-3 row">
+                    <label for="phone_number" class="col-md-4 col-form-label text-md-end" style="font-weight: bold; color: #495057;">Teléfono</label>
+                    <div class="col-md-6">
+                        <input type="text" name="phone_number" id="phone_number" class="form-control" placeholder="Teléfono" value="{{ $user->phone_number }}" style="border-radius: 8px; border-color: #ced4da;">
+                    </div>
                 </div>
-            </div>
-            <br>
-            <button type="submit" class="btn btn-primary">Editar</button>
+
+                <div class="mb-3 row">
+                    <label for="email" class="col-md-4 col-form-label text-md-end" style="font-weight: bold; color: #495057;">Correo</label>
+                    <div class="col-md-6">
+                        <input type="email" name="email" id="email" class="form-control" placeholder="Correo" value="{{ $user->email }}" style="border-radius: 8px; border-color: #ced4da;">
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-success" style="padding: 10px 30px; font-size: 16px; border-radius: 50px;">Editar</button>
+                </div>
             </form>
         </div>
     </div>
-    </div>
-
-</body>
-
-</html>
+</div>
+@endsection

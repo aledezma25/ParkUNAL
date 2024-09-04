@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Button, Input, Text, Icon } from 'react-native-elements';
 import { addVehicle, getVehicleTypes, getCurrentUser } from '../functions/actions'; 
-import { isEmpty } from 'lodash';
-import { useEffect } from 'react';
 import { Picker } from '@react-native-picker/picker';
 
 export default function AddVehicleForm({ setShowModal, toastRef, onReload }) {
@@ -15,12 +13,11 @@ export default function AddVehicleForm({ setShowModal, toastRef, onReload }) {
     plate: '',
     image: '',
   });
-  const [error, setError] = useState(null);
+  const [error, setError] = useState({});
   const [loading, setLoading] = useState(false);
   const [vehicleTypes, setVehicleTypes] = useState([]);
 
   useEffect(() => {
-    // Cargar los tipos de vehículos al montar el componente
     fetchVehicleTypes();
   }, []);
 
@@ -34,7 +31,6 @@ export default function AddVehicleForm({ setShowModal, toastRef, onReload }) {
   };
 
   useEffect(() => {
-    // Obtener el ID del usuario al montar el componente
     const fetchData = async () => {
       try {
         const currentUser = await getCurrentUser();
@@ -49,19 +45,41 @@ export default function AddVehicleForm({ setShowModal, toastRef, onReload }) {
     fetchData();
   }, []);
 
-  const validateForm = () => {
-    const { plate, idTypes, color } = newVehicle;
-  
-    if (!plate || !idTypes || !color) {
-      setError({ message: 'Todos los campos son obligatorios' });
-      return false;
-    }
-    return true;
+  const handleVehicleTypeChange = (itemValue) => {
+    setNewVehicle((prevState) => ({
+      ...prevState,
+      idTypes: itemValue,
+      plate: itemValue === 'Bicicleta' ? 'NO' : prevState.plate,
+    }));
   };
-  
-  
 
- const onSubmit = async () => {
+  const validateForm = () => {
+    const { plate, idTypes, color, mark } = newVehicle;
+    let isValid = true;
+    let errors = {};
+
+    if (!mark) {
+      errors.mark = 'La marca es obligatoria';
+      isValid = false;
+    }
+    if (!plate) {
+      errors.plate = 'La placa es obligatoria';
+      isValid = false;
+    }
+    if (!idTypes) {
+      errors.idTypes = 'El tipo de vehículo es obligatorio';
+      isValid = false;
+    }
+    if (!color) {
+      errors.color = 'El color es obligatorio';
+      isValid = false;
+    }
+
+    setError(errors);
+    return isValid;
+  };
+
+  const onSubmit = async () => {
     if (!validateForm()) {
       return;
     }
@@ -94,7 +112,7 @@ export default function AddVehicleForm({ setShowModal, toastRef, onReload }) {
         containerStyle={styles.input}
         value={newVehicle.mark}
         onChangeText={(text) => setNewVehicle({ ...newVehicle, mark: text })}
-        errorMessage={error && error.mark}
+        errorMessage={error.mark}
         rightIcon={{
           type: 'material-community',
           name: 'car',
@@ -104,7 +122,7 @@ export default function AddVehicleForm({ setShowModal, toastRef, onReload }) {
       <View style={styles.pickerContainer}>
         <Picker
           selectedValue={newVehicle.idTypes}
-          onValueChange={(itemValue) => setNewVehicle({ ...newVehicle, idTypes: itemValue })}
+          onValueChange={handleVehicleTypeChange}
           style={styles.picker}
         >
           <Picker.Item label="Seleccione un tipo" value="" />
@@ -118,7 +136,7 @@ export default function AddVehicleForm({ setShowModal, toastRef, onReload }) {
         containerStyle={styles.input}
         value={newVehicle.color}
         onChangeText={(text) => setNewVehicle({ ...newVehicle, color: text })}
-        errorMessage={error && error.color}
+        errorMessage={error.color}
         rightIcon={{
           type: 'material-community',
           name: 'palette-outline',
@@ -130,25 +148,14 @@ export default function AddVehicleForm({ setShowModal, toastRef, onReload }) {
         containerStyle={styles.input}
         value={newVehicle.plate}
         onChangeText={(text) => setNewVehicle({ ...newVehicle, plate: text })}
-        errorMessage={error && error.plate}
+        errorMessage={error.plate}
         rightIcon={{
           type: 'material-community',
-          name: 'information',
+          name: 'card-text-outline',
           color: '#c2c2c2',
         }}
       />
-      <Input
-        placeholder="URL de imagen"
-        containerStyle={styles.input}
-        value={newVehicle.image}
-        onChangeText={(text) => setNewVehicle({ ...newVehicle, image: text })}
-        errorMessage={error && error.image}
-        rightIcon={{
-          type: 'material-community',
-          name: 'image',
-          color: '#c2c2c2',
-        }}
-      />
+
       <Button
         title="Agregar Vehículo"
         containerStyle={styles.buttonContainer}
@@ -156,7 +163,7 @@ export default function AddVehicleForm({ setShowModal, toastRef, onReload }) {
         onPress={onSubmit}
         loading={loading}
       />
-    <TouchableOpacity style={styles.closeButton} onPress={() => setShowModal(false)}>
+      <TouchableOpacity style={styles.closeButton} onPress={() => setShowModal(false)}>
         <Icon name="close" type="material-community" color="#fff" size={24} />
       </TouchableOpacity>
     </View>

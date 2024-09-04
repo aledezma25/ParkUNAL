@@ -37,6 +37,7 @@ export default function VehiculosQR() {
   const [qrText, setQrText] = useState('');
   const logoFromFile = require('../../assets/parkun.png');
   const qrViewRef = useRef();
+  const [vehicleMark, setVehicleMark] = useState("");
 
 
   useEffect(() => {
@@ -87,6 +88,10 @@ export default function VehiculosQR() {
             if (success) {
               const userVehicles = vehiclesData.filter(vehicle => vehicle.idUser === currentUser.id);
               setVehicles(userVehicles);
+              
+              const vehicleMark = userVehicles.map((vehicle) => vehicle.mark);
+              setVehicleMark(vehicleMark);
+             
             } else {
               console.error(error);
             }
@@ -127,6 +132,8 @@ export default function VehiculosQR() {
   }
   const handleShowQRModal = (vehicle) => {
     setSelectedVehicle(vehicle);
+    const vehicleMark = vehicle.mark;
+    setVehicleMark(vehicleMark);
     setQrText(vehicle.id.toString()); // Aquí puedes ajustar el texto del QR según lo que necesites
     setShowQRModal(true);
   };
@@ -178,8 +185,8 @@ export default function VehiculosQR() {
         <Text style={styles.vehicleTextType}> 
         {/* Icono dependiendo el tipo de vehiculo 1= car, 2= motorbike, 3= bicycle */}
         <Icon
-          name={item.idTypes === 1 ? 'car' : item.idTypes === 2 ? 'motorbike' : 'bike'}
-          type="material-community"
+          name={item.idTypes === 1 ? 'car' : item.idTypes === 2 ? 'motorcycle' : 'bicycle'}
+          type="font-awesome"
           color="#ccc"
           size={40}
           containerStyle={{ position: 'absolute', right: 10}}
@@ -272,7 +279,8 @@ export default function VehiculosQR() {
       {/* QR Modal */}
       <Modal isVisible={showQRModal} setVisible={setShowQRModal}>
         <View style={styles.qrModalContent}>
-          <Text style={styles.qrModalTitle}>Código QR del Vehículo</Text>
+          <Text style={styles.qrModalTitle}>Código QR del Vehículo:</Text>
+          <Text style={styles.vehicleMark}>{vehicleMark}</Text>
           <ViewShot ref={qrViewRef} options={{ format: 'png', quality: 1 }}>
             <QRCode
               value={qrText}
@@ -291,8 +299,12 @@ export default function VehiculosQR() {
           size={40}
         />
         <View style={styles.qrModalContent}>
+        <View style={styles.message}>
+        <Text style={styles.text1}>Muestre este código QR al vigilante para 
+        que pueda escanearlo.</Text>
+      </View>
         
-        <Icon
+        {/* <Icon
           name="download"
           type="material-community"
           color="#94b43b"
@@ -308,7 +320,7 @@ export default function VehiculosQR() {
           onPress={() => handleShareQR()}
           containerStyle={{ position: 'absolute', bottom: 10, right: 10}}
           size={50}
-        />
+        /> */}
         </View>
         
       </Modal>
@@ -417,8 +429,35 @@ const styles = StyleSheet.create({
   qrModalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 70,
+    marginBottom: 10,
   },
+  message: {
+    margin: 20,
+    padding: 10,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 10,
+  },
+  text1: {
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
+    marginVertical: 5,
+  },
+  vehicleMark: {
+    color: '#94b43b',
+    fontWeight: 'bold',
+    fontSize: 20,
+    marginBottom: 50,
+    //alinear al centro
+    textAlign: 'center',
+
+  },
+ 
+
+
 });
+  
+
+
 
 

@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
 import { useCallback } from "react";
+import { Audio } from "expo-av"; // Importa Audio de expo-av
 import { useFocusEffect } from "@react-navigation/native";
 import {
   fillEntryRecord,
@@ -24,6 +25,7 @@ import FocusSymbol from "./FocusSymbol";
 //importar switch
 import { Switch } from "react-native";
 import { updateSpaces, getVehicleTypes } from "../functions/actions";
+import { BASE_URL } from "../../utils/helpers";
 
 const LectorQR = () => {
   const [hasPermission, setHasPermission] = useState(null);
@@ -34,6 +36,8 @@ const LectorQR = () => {
   const [successMessage, setSuccessMessage] = useState(null); // Estado para mostrar mensaje de éxito
   const [registerMode, setRegisterMode] = useState("entry"); // Por defecto, se registra una entrada
   const [errorMessage, setErrorMessage] = useState("");
+  const [sound, setSound] = useState(null);
+  const [vehicleMark, setVehicleMark] = useState("");
 
   useFocusEffect(
     useCallback(() => {
@@ -44,10 +48,32 @@ const LectorQR = () => {
     }, [])
   );
 
+   // Función para cargar y reproducir el sonido
+   const playSound = async () => {
+    console.log('Loading Sound');
+    const { sound } = await Audio.Sound.createAsync(
+      { uri: `${BASE_URL}/sounds/scan.mp3` }  // Asegúrate de que esta ruta sea correcta
+    );
+    setSound(sound);
+
+    console.log('Playing Sound');
+    await sound.playAsync();
+  };
+
+  // Cleanup: Unload sound from memory when component unmounts
+  useEffect(() => {
+    return sound
+      ? () => {
+          sound.unloadAsync(); // Desmontar el sonido para liberar memoria
+        }
+      : undefined;
+  }, [sound]);
+
   // Función para obtener el vehiculo por id
   const obtenerVehiculo = async (vehicleId) => {
     try {
       const response = await getVehicleById(vehicleId);
+      setVehicleMark(response.mark);
       return response;
     } catch (error) {
       console.error("Error al obtener el vehículo:", error);
@@ -60,6 +86,7 @@ const LectorQR = () => {
     try {
       const response = await getCurrentUser();
       return response.name;
+      
     } catch (error) {
       console.error("Error al obtener el usuario actual:", error);
       return null;
@@ -75,6 +102,7 @@ const LectorQR = () => {
     if (!scanned) {
       setScanned(true);
       setScannedData(data);
+      playSound(); // Reproduce el sonido      
       setShowConfirmation(true);
     }
   };
@@ -106,10 +134,10 @@ const LectorQR = () => {
           // Mostrar mensaje de error
           setErrorMessage("Ya existe una entrada pendiente para este vehículo");
 
-          // Programar la limpieza del mensaje después de 3 segundos (3000 milisegundos)
+          // Programar la limpieza del mensaje después de 5 segundos (5000 milisegundos)
           setTimeout(() => {
             setErrorMessage("");
-          }, 3000);
+          }, 5000);
 
           return;
         }
@@ -145,7 +173,7 @@ const LectorQR = () => {
           setErrorMessage("No se ha registrado una entrada para este vehículo");
           setTimeout(() => {
             setErrorMessage("");
-          }, 3000);
+          }, 5000);
           return;
         }
         
@@ -154,7 +182,7 @@ const LectorQR = () => {
           setErrorMessage("Este vehículo ya ha registrado una salida");
           setTimeout(() => {
             setErrorMessage("");
-          }, 3000);
+          }, 5000);
           return;
         }
 
@@ -262,7 +290,7 @@ const LectorQR = () => {
       <Modal visible={showConfirmation} transparent={true}>
         <View style={styles.modalContainer}>
           <Text style={styles.modalText}>
-            ¿Deseas registrar la lectura del código QR?
+            ¿Deseas registrar la lectura del vehiculo {vehicleMark}?
           </Text>
           <View style={styles.buttonContainer}>
             <TouchableOpacity

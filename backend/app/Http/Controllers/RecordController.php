@@ -64,5 +64,12 @@ class RecordController extends Controller
         $record = Record::where('idVehicle', $id)->orderBy('id', 'desc')->first();
         return json_decode($record, true);
     }
+
+   
+
+  
+
     
+
+
 }

@@ -1,15 +1,25 @@
 @extends('layouts.app')
 
+@section('css')
+    <link href="https://cdn.datatables.net/2.1.3/css/dataTables.bootstrap5.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+@endsection
+
 @section('content')
+
     <div class="container">
         <div class="row justify-content-center">
             <div class="">
                 <div class="card">
-                    <div class="card-header">{{ __('Registros') }}</div>
+                            {{-- <a href="/home" class="btn btn-success">Actualizar</a> --}}
+                    {{-- Actualizar la pagina automaticamente --}}
+                    <meta http-equiv="refresh" content="60">
+                    
                     
                     <div class="card-body">
-                        <table class="table table-striped">
-                            <thead>
+                        {{-- <a href="{{ route('records.registervisited') }}" class="btn btn-primary">Ver visitantes</a> --}}
+                        <table id="myTable" class="table table-striped table-bordered shadow-lg mt-4">
+                            <thead class="table-success">
                                 <tr>
                                     <th scope="col">Id</th>
                                     <th scope="col">Nombre</th>
@@ -85,4 +95,24 @@
             </div>
         </div>
     </div>
+
+    @section('js')
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/2.1.3/js/dataTables.js"></script>
+    <script src="https://cdn.datatables.net/2.1.3/js/dataTables.bootstrap5.js"></script>
+    <script>
+        $(document).ready(function() {
+            //Paginacion de 5 elementos
+            $('#myTable').DataTable({
+                "lengthMenu": [[5, 10, 20, 50, -1], [5, 10, 20, 50, "All"]],
+                //por defecto ordenado por la columna 0
+                "order": [[ 0, "desc" ]]
+
+            });
+
+        });
+    </script>
 @endsection
+@endsection
+

@@ -19,6 +19,10 @@
     {{-- Ancizar Sans --}}
     <link href="https://fonts.googleapis.com/css2?family=Ancizar+Sans:wght@400;700&display=swap" rel="stylesheet">
 
+    {{-- Datatable --}}
+    @yield('css')
+    {{-- <link rel="stylesheet" href="https://cdn.datatables.net/2.1.3/css/dataTables.dataTables.css" /> --}}
+
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
@@ -88,5 +92,7 @@
             @yield('content')
         </main>
     </div>
+    @yield('js')
+
 </body>
 </html>

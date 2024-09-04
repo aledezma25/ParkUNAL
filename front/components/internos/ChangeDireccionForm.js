@@ -21,7 +21,9 @@ export default function ChangeNameForm({id, address, setShowModal, toastRef, onR
             return;
         }
         setLoading(true);
+        console.log(parsedId);
         const result = await changeDireccion(parsedId, newAddress);
+
         setLoading(false);
 
         if (!result) {

@@ -69,6 +69,30 @@ class VehicleController extends Controller
     
     }
 
+    public function storeWeb(Request $request)
+    {
+        $vehicle = new Vehicle();
+
+        //dd($request->hasFile('image'));
+        $vehicle->mark = $request->mark;
+        $vehicle->idTypes = $request->idTypes;
+        $vehicle->idUser = $request->idUser;
+        $vehicle->color = $request->color;
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $destinationPath = 'imagenes/vehicle/';
+            $fileName = $file->getClientOriginalName(); // se crea variable para obtener el nombre, la funcion time sirve para que los nombres no se repitan
+            $uploadSuccess = $request->file('image')->move($destinationPath, $fileName);
+            $vehicle->image = $destinationPath . $fileName;
+        }
+        $vehicle->plate = $request->plate;
+
+        $vehicle->save();
+        //retornar mensaje de exito json
+        // return json_encode(["success" => true, "message" => "Vehiculo creado exitosamente!"]);
+        return redirect()->route('vehicles.index')->with('success', 'Vehiculo creado exitosamente!');
+    }
+
     /**
      * Display the specified resource.
      *
@@ -122,6 +146,27 @@ class VehicleController extends Controller
         return json_encode(["success" => true, "message" => "Vehiculo editado exitosamente!"]);
     }
 
+    public function updateWeb(Request $request, $id)
+    {
+        $vehicle = Vehicle::find($id);
+        $vehicle->mark = $request->mark;
+        $vehicle->idTypes = $request->idTypes;
+        $vehicle->idUser = $request->idUser;
+        $vehicle->color = $request->color;
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $destinationPath = 'imagenes/vehicles/';
+            $fileName = $file->getClientOriginalName(); // se crea variable para obtener el nombre, la funcion time sirve para que los nombres no se repitan
+            $uploadSuccess = $request->file('image')->move($destinationPath, $fileName);
+            $vehicle->image = $destinationPath . $fileName;
+        }
+        $vehicle->plate = $request->plate;
+
+        $vehicle->save();
+        return redirect()->route('vehicles.index')->with('success', 'Vehiculo editado exitosamente!');
+        // return json_encode(["success" => true, "message" => "Vehiculo editado exitosamente!"]);
+    }
+
     /**
      * Remove the specified resource from storage.
      *
@@ -133,6 +178,13 @@ class VehicleController extends Controller
         $vehicle = Vehicle::find($id);
         $vehicle->delete();
         return json_encode(["success" => true, "message" => "Vehiculo eliminado exitosamente!"]);
+    }
+
+    public function destroyWeb($id)
+    {
+        $vehicle = Vehicle::find($id);
+        $vehicle->delete();
+        return redirect()->route('vehicles.index')->with('success', 'Vehiculo eliminado exitosamente!');
     }
 
  
