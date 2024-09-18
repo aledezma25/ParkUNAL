@@ -21,6 +21,7 @@ export const isUserLogged = async () => {
     }
 }
 
+
 // Función para obtener el usuario actual
 export const getCurrentUser = async () => {
     try {
@@ -146,7 +147,7 @@ catch (error) {
 }
 
 
-// función para guardar un nuevo vehículo y mandando el token
+// función para guardar un nuevo vehículo 
 export const addVehicle = async (vehicleData) => {
   try {
     const token = await AsyncStorage.getItem('token');
@@ -375,3 +376,14 @@ export const addComment = async (commentData) => {
     return { success: false, message: 'Error de red' };
   }
 };
+
+//funcion para obtener usuario por id
+export const getUserById = async (userId) => {
+  try {
+    const response = await axios.get(`${BASE_URL}/api/users/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener el usuario:', error);
+    return null;
+  }
+}; 

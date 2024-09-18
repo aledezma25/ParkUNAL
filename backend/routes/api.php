@@ -44,12 +44,15 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-//ruta para obtener todo los vehicles
+//ruta para obtener todo los vehicles en formato json
 Route::get('/vehicles', [VehicleController::class, 'indexreact']);
 // ruta para agregar un vehicle
 Route::post('/vehicles', [VehicleController::class, 'store']);
+//ruta para actualizar un vehicle
 Route::put('/vehicles/{id}', [VehicleController::class, 'update']);
+//ruta para eliminar un vehicle
 Route::delete('/vehicles/{id}', [VehicleController::class, 'destroy']);
+//ruta para obtener un vehicle por id
 Route::get('/vehicles/{id}', [VehicleController::class, 'show']);
 
 

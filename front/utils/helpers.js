@@ -9,13 +9,12 @@ export function validateEmail(email) {
 }
 
 //URL de la API desde el backend laravel
-export const BASE_URL = 'http://172.20.28.126:8000';
+export const BASE_URL = 'http://192.168.137.1:8000';
 
 //URL del microservicio en express
-export const BASE_URL2 = 'http://172.20.28.126:3000';
+export const BASE_URL2 = 'http://192.168.137.1:3000';
 
-//URL del microservicio del feed
-export const BASE_URL3 = 'http://192.168.137.1:4000';
+
 
 
 
@@ -52,13 +51,3 @@ export const fileToBlob = async(path) => {
 
 
 
-//web ID
-// 917671134914-40h5e7uhm171umnhj9l9oolk7572d13u.apps.googleusercontent.com
-
-//web secret
-// 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
-
-//IOS ID
-// 917671134914-d5r3vn21j9t5adjaio4mkvkcuqkc486d.apps.googleusercontent.com
-
-//Android ID

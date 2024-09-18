@@ -1,18 +1,15 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Text,
   View,
   StyleSheet,
-  Button,
   Modal,
   TouchableOpacity,
   Animated,
   Easing,
+  Alert,
 } from "react-native";
-import { BarCodeScanner } from "expo-barcode-scanner";
-import { useCallback } from "react";
-import { Audio } from "expo-av"; // Importa Audio de expo-av
-import { useFocusEffect } from "@react-navigation/native";
+import { Icon } from "react-native-elements";
 import {
   fillEntryRecord,
   getCurrentUser,
@@ -20,12 +17,14 @@ import {
   getLastEntryRecord,
   updateExitRecord,
   getVehicleTypeById,
+  updateSpaces,
 } from "../functions/actions";
+import { BarCodeScanner } from "expo-barcode-scanner";
+import { Audio } from "expo-av";
+import { useFocusEffect } from "@react-navigation/native";
 import FocusSymbol from "./FocusSymbol";
-//importar switch
-import { Switch } from "react-native";
-import { updateSpaces, getVehicleTypes } from "../functions/actions";
 import { BASE_URL } from "../../utils/helpers";
+import Loading from "../functions/Loading";
 
 const LectorQR = () => {
   const [hasPermission, setHasPermission] = useState(null);
@@ -33,11 +32,23 @@ const LectorQR = () => {
   const [scannedData, setScannedData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [successMessage, setSuccessMessage] = useState(null); // Estado para mostrar mensaje de éxito
-  const [registerMode, setRegisterMode] = useState("entry"); // Por defecto, se registra una entrada
-  const [errorMessage, setErrorMessage] = useState("");
+  const [showError, setShowError] = useState(false); // Para controlar el modal de error
+  const [errorMessage, setErrorMessage] = useState(""); // Mensaje de error
   const [sound, setSound] = useState(null);
-  const [vehicleMark, setVehicleMark] = useState("");
+  const [vehicleDetails, setVehicleDetails] = useState(null);
+  const [nameUser, setNameUser] = useState(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      requestCameraPermission();
+      preloadSound(); // Pre-cargar sonido al enfocar la pantalla
+      return () => {
+        if (sound) {
+          sound.unloadAsync();
+        }
+      };
+    }, [sound])
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -48,48 +59,24 @@ const LectorQR = () => {
     }, [])
   );
 
-   // Función para cargar y reproducir el sonido
-   const playSound = async () => {
-    console.log('Loading Sound');
-    const { sound } = await Audio.Sound.createAsync(
-      { uri: `${BASE_URL}/sounds/scan.mp3` }  // Asegúrate de que esta ruta sea correcta
+  const enfocar = () => {
+    setHasPermission(null);
+    requestCameraPermission();
+    resetScanner();
+    
+  };
+  
+  const preloadSound = async () => {
+    const { sound: newSound } = await Audio.Sound.createAsync(
+      { uri: `${BASE_URL}/sounds/scan.mp3` },
+      { shouldPlay: false }
     );
-    setSound(sound);
-
-    console.log('Playing Sound');
-    await sound.playAsync();
+    setSound(newSound);
   };
 
-  // Cleanup: Unload sound from memory when component unmounts
-  useEffect(() => {
-    return sound
-      ? () => {
-          sound.unloadAsync(); // Desmontar el sonido para liberar memoria
-        }
-      : undefined;
-  }, [sound]);
-
-  // Función para obtener el vehiculo por id
-  const obtenerVehiculo = async (vehicleId) => {
-    try {
-      const response = await getVehicleById(vehicleId);
-      setVehicleMark(response.mark);
-      return response;
-    } catch (error) {
-      console.error("Error al obtener el vehículo:", error);
-      return null;
-    }
-  };
-
-  // funcion para obtener el nombre del usuario actual
-  const obtenerUsuarioActual = async () => {
-    try {
-      const response = await getCurrentUser();
-      return response.name;
-      
-    } catch (error) {
-      console.error("Error al obtener el usuario actual:", error);
-      return null;
+  const playSound = async () => {
+    if (sound) {
+      await sound.replayAsync();
     }
   };
 
@@ -98,216 +85,290 @@ const LectorQR = () => {
     setHasPermission(status === "granted");
   };
 
-  const handleBarCodeScanned = ({ type, data }) => {
-    if (!scanned) {
-      setScanned(true);
-      setScannedData(data);
-      playSound(); // Reproduce el sonido      
-      setShowConfirmation(true);
+  //funcion para obtener el tipo de vehiculo por id
+  const obtenerTipoVehiculo = async (id) => {
+    try {
+      const response = await getVehicleTypeById(id);
+      if (response) {
+        return response;
+      }
+    } catch (error) {
+      console.error("Error al obtener el tipo de vehículo:", error);
+      return null;
     }
   };
 
-  const confirmRegistration = async () => {
-    try {
-      const types = await getVehicleTypes(scannedData);
-      // Obtener la fecha y hora actuales
-      const currentDate = new Date();
-      const entryDate = currentDate.toISOString().split("T")[0];
-      const entryTime = currentDate.toLocaleTimeString("en-US", {
-        hour12: false,
-      });
 
-      // Obtener el vehículo escaneado
-      const vehicle = await obtenerVehiculo(scannedData);
-      if (!vehicle) {
-        console.error("No se encontró el vehículo escaneado");
+  // funcion para obtener el nombre del usuario actual
+  const obtenerUsuarioActual = async () => {
+    try {
+      const response = await getCurrentUser();
+      if (response) {
+        setNameUser(response.name);
+        return response.name;
+      }
+    } catch (error) {
+      console.error("Error al obtener el usuario actual:", error);
+      return null;
+    }
+  };
+
+  const entryRegister = async () => {
+    setLoading(true);
+    await obtenerUsuarioActual();
+    // Obtener la fecha y hora actuales
+    const currentDate = new Date();
+    const entryDate = currentDate.toISOString().split("T")[0];
+    const entryTime = currentDate.toLocaleTimeString("en-US", {
+      hour12: false,
+    });
+    let response;
+    let responseSpaces;
+    const lastEntry = await getLastEntryRecord(scannedData.id);
+    if (lastEntry && lastEntry.exitDate === null) {
+      // Si el vehículo ya está registrado y no ha salido
+      setErrorMessage("El vehículo ya está registrado y no ha salido.");
+      Alert.alert("¡Atención!", "El vehículo ya está registrado y no ha salido.");
+      setShowError(true); // Mostrar modal de error
+      resetScanner();
+    } else {
+      // Si el vehículo no ha salido, registrar la entrada
+      response = await fillEntryRecord({
+        entryDate: entryDate,
+        exitDate: null,
+        entryTime: entryTime,
+        exitTime: null,
+        idVehicle: scannedData.id,
+        idUser: scannedData.idUser,
+        nameAdmin: nameUser,
+      });
+      // console.log("response", response);
+      // si el message de response es igual a "Error de red" entonces mostrar el mensaje de error
+      if (response.message === "Error de red") {
+        setErrorMessage("Error de red");
+        Alert.alert("¡Atención!", "Error de red, vuelve a leer el código QR.");
+        setShowError(true); // Mostrar modal de error
+        resetScanner();
         return;
       }
-
-      let response;
-      let responseSpaces;
-
-      if (registerMode === "entry") {
-        // Verificar si ya existe una entrada sin fecha de salida para este vehículo
-        const lastEntry = await getLastEntryRecord(scannedData);
-        if (lastEntry && !lastEntry.exitDate && !lastEntry.exitTime) {
-          // Mostrar mensaje de error
-          setErrorMessage("Ya existe una entrada pendiente para este vehículo");
-
-          // Programar la limpieza del mensaje después de 5 segundos (5000 milisegundos)
-          setTimeout(() => {
-            setErrorMessage("");
-          }, 5000);
-
-          return;
-        }
-        // Registro de entrada
-        response = await fillEntryRecord({
-          entryDate: entryDate,
-          exitDate: null,
-          entryTime: entryTime,
-          exitTime: null,
-          idVehicle: scannedData,
-          idUser: vehicle.idUser,
-          nameAdmin: await obtenerUsuarioActual(),
-        });
-        const vehicleType = await getVehicleTypeById(vehicle.idTypes);
-        if (!vehicleType) {
-          console.error("No se encontró el tipo de vehículo");
-          return; // O maneja el error de otra forma según tu flujo
-        }
-
-        // Calcular los nuevos espacios
-        const newSpaces = vehicleType.spaces - 1; // Restar un espacio
-
-
-        // Actualizar los espacios disponibles en la base de datos con la funcion updateSpaces
-        responseSpaces = await updateSpaces(vehicle.idTypes, newSpaces);
-
-      } else {
-
-        // Registro de salida (actualización de la última entrada) 
-        const lastEntry = await getLastEntryRecord(scannedData); // Implementa esta función para obtener la última entrada del vehículo
-        if (!lastEntry) {
-          //mensaje de que aun no se ha registrado una entrada
-          setErrorMessage("No se ha registrado una entrada para este vehículo");
-          setTimeout(() => {
-            setErrorMessage("");
-          }, 5000);
-          return;
-        }
-        
-        if (lastEntry.exitDate && lastEntry.exitTime) {
-          // Mostrar mensaje de error si ya existe una salida registrada
-          setErrorMessage("Este vehículo ya ha registrado una salida");
-          setTimeout(() => {
-            setErrorMessage("");
-          }, 5000);
-          return;
-        }
-
-        // Actualizar la entrada con la fecha y hora de salida
-        response = await updateExitRecord(lastEntry.id, {
-          ...lastEntry,
-          exitDate: entryDate,
-          exitTime: entryTime,
-          nameAdmin: await obtenerUsuarioActual(),
-        });
-        const vehicleType = await getVehicleTypeById(vehicle.idTypes);
-        if (!vehicleType) {
-          console.error("No se encontró el tipo de vehículo");
-          return; // O maneja el error de otra forma según tu flujo
-        }
-
-        // Calcular los nuevos espacios
-        const newSpaces = vehicleType.spaces + 1; // Sumar un espacio
-
-
-        // Actualizar los espacios disponibles en la base de datos con la funcion updateSpaces
-        responseSpaces = await updateSpaces(vehicle.idTypes, newSpaces);
+      
+      // console.log("response", response);
+      // Actualizar la cantidad de espacios disponibles
+      const vehicleType = await obtenerTipoVehiculo(scannedData.idType);
+      if (!vehicleType) {
+        console.error("Tipo de vehículo no encontrado");
+        return;
       }
+      const newSpaces = vehicleType.spaces - 1;
+      responseSpaces = await updateSpaces(vehicleType.id, newSpaces);
+    }
+    if (response && responseSpaces) {
+      console.log("Entrada registrada con éxito");
+      Alert.alert("Éxito", "Entrada registrada con éxito");
 
-      // Mostrar mensaje de éxito
-      setSuccessMessage(
-        registerMode === "entry"
-          ? "Registro de entrada realizado con éxito"
-          : "Registro de salida realizado con éxito"
-      );
 
-      // Reiniciar estados y ocultar modal después de unos segundos
-      setTimeout(() => {
-        setScanned(false);
-        setShowConfirmation(false);
-        setSuccessMessage(null);
-      }, 1000);
-      setErrorMessage("");
-    } catch (error) {
-      console.error("Error al llenar el registro:", error);
+
+      resetScanner();
+    }
+    resetScanner();
+  };
+
+  const exitRegister = async () => {
+    setLoading(true);
+    await obtenerUsuarioActual();
+    // Obtener la fecha y hora actuales
+    const currentDate = new Date();
+    const exitDate = currentDate.toISOString().split("T")[0];
+    const exitTime = currentDate.toLocaleTimeString("en-US", {
+      hour12: false,
+    });
+    let response;
+    let responseSpaces;
+    const lastEntry = await getLastEntryRecord(scannedData.id); // Obtener el último registro de entrada
+    if (!lastEntry) {
+      // Si no hay registros de entrada
+      setErrorMessage("El vehículo no tiene registros de entrada.");
+      Alert.alert("¡Atención!", "El vehículo no tiene registros de entrada.");
+      setShowError(true); // Mostrar modal de error
+      resetScanner();
+    }
+    if (lastEntry.exitDate && lastEntry.exitTime) {
+      // Si el vehículo ya salió
+      setErrorMessage("El vehículo ya salió.");
+      Alert.alert("¡Atención!", "El vehículo ya salió.");
+      setShowError(true); // Mostrar modal de error
+      resetScanner();
+      return;
+    } else{
+      // Si el vehículo no ha salido, registrar la salida
+      response = await updateExitRecord(lastEntry.id, {
+        ...lastEntry,
+        exitDate: exitDate,
+        exitTime: exitTime,
+        nameAdmin: nameUser,
+      });
+      // si el message de response es igual a "Error de red" entonces mostrar el mensaje de error
+      if (response.message === "Error de red") {
+        setErrorMessage("Error de red");
+        Alert.alert("¡Atención!", "Error de red, vuelve a leer el código QR.");
+        setShowError(true); // Mostrar modal de error
+        resetScanner();
+        return;
+      }
+      // Actualizar la cantidad de espacios disponibles
+      const vehicleType = await obtenerTipoVehiculo(scannedData.idType);
+      if (!vehicleType) {
+        console.error("Tipo de vehículo no encontrado");
+        return;
+      }
+      const newSpaces = vehicleType.spaces + 1;
+      responseSpaces = await updateSpaces(vehicleType.id, newSpaces);
+      if (response && responseSpaces) {
+        console.log("Salida registrada con éxito");
+        Alert.alert("Éxito", "Salida registrada con éxito");
+        resetScanner();
+        return;
+      }
+    }
+    resetScanner();
+  };
+
+  const handleBarCodeScanned = async ({ data }) => {
+    if (!scanned) {
+      setScanned(true);
+
+      try {
+        // Intentar parsear el dato escaneado como JSON
+        const parsedData = JSON.parse(data);
+
+        // Validar que el QR tiene los campos esperados
+        if (parsedData.id && parsedData.plate && parsedData.mark) {
+          setScannedData(parsedData); // Guardar los datos parseados
+          playSound();
+          // console.log("Datos escaneados: ", parsedData);
+
+          // Asignar detalles específicos del vehículo a los estados correspondientes
+          setVehicleDetails({
+            id: parsedData.id,
+            plate: parsedData.plate,
+            mark: parsedData.mark,
+            color: parsedData.color,
+            nameUser: parsedData.nameUser,
+            type: parsedData.type,
+          });
+
+          setShowConfirmation(true);
+          setLoading(false); // Asegúrate de que `loading` se maneje correctamente
+          
+        } else {
+          // Si los campos no son los esperados, mostrar un mensaje de error
+          throw new Error("El QR escaneado no es válido para esta aplicación.");
+        }
+      } catch (error) {
+        // console.log("Error al parsear el QR escaneado: ", error);
+        setErrorMessage("El código QR escaneado no es válido.");
+        setShowError(true); // Mostrar modal de error
+        setScanned(false); // Resetear el escáner
+      }
     }
   };
 
-  const cancelRegistration = () => {
-    setScanned(false); // Reiniciar el estado de scanned al cancelar el registro
-    setShowConfirmation(false); // Ocultar el modal de confirmación
+  const resetScanner = () => {
+    setLoading(false);
+    setScanned(false);
+    setShowConfirmation(false);
+    setScannedData(null);
+    setShowError(false); // Resetear el mensaje de error si estaba activo
+    //recargar la pantalla
+    requestCameraPermission();
   };
 
   if (hasPermission === null) {
-    return <Text>Solicitando permiso para acceder a la cámara...</Text>;
+    return <Text style={styles.permisocamera}>Solicitando permiso para acceder a la cámara...</Text>;
   }
   if (hasPermission === false) {
-    return <Text>Permiso denegado para acceder a la cámara</Text>;
+    return <Text style={styles.permisocameraDenegado}>Permiso denegado para acceder a la cámara</Text>;
   }
 
   return (
     <View style={styles.container}>
-      <View style={styles.titleContainer}>
-        <Text style={styles.titleText}>Escanea el código QR</Text>
+      <Text style={styles.titleText}>Escanea el código QR</Text>
+
+    <Loading isVisible={loading} text="Cargando..." />
+
+      {/* Modal de Confirmación de Vehículo */}
+<Modal visible={showConfirmation} transparent={true} animationType="slide">
+  <View style={styles.modalContainer}>
+    <View style={styles.modalContent}>
+      {/* Botón de Cerrar */}
+      <TouchableOpacity
+        style={styles.closeButton}
+        onPress={resetScanner}
+      >
+        <Text style={styles.buttonText}>X</Text>
+      </TouchableOpacity>
+      {vehicleDetails && (
+        <>
+          <Text style={styles.modalTitle}>Detalles del vehículo</Text>
+          <Text style={styles.detailText}>
+            ID: {vehicleDetails.id}
+          </Text>
+          <Text style={styles.negrita}><Text style={styles.detailText}>
+            {vehicleDetails.type}
+          </Text></Text>
+          <Text style={styles.detailText}>
+            Modelo: {vehicleDetails.mark}
+          </Text>
+          <Text style={styles.detailText}>
+            Placa: <Text style={styles.negrita}>{vehicleDetails.plate}</Text>
+          </Text>
+          <Text style={styles.detailText}>
+            Color: {vehicleDetails.color}
+          </Text>
+          <Text style={styles.detailText}>
+            Propietario: <Text style={styles.negrita}>{vehicleDetails.nameUser}</Text>
+          </Text>
+          
+  
+        </>
+      )}
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={styles.entryRegister}
+          onPress={entryRegister}
+        >
+          <Text style={styles.buttonText}>Entrada</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.exitRegister}
+          onPress={exitRegister}
+        >
+          <Text style={styles.buttonText}>Salida</Text>
+        </TouchableOpacity>
       </View>
 
-      <View style={styles.modeSwitch}>
-        <Text style={styles.switchText}>Registro:</Text>
-        <TouchableOpacity
-          onPress={() => setRegisterMode("entry")}
-          style={[
-            styles.switchOption,
-            registerMode === "entry" && styles.switchOptionSelected,
-          ]}
-        >
-          <Text
-            style={[
-              styles.switchOptionText,
-              registerMode === "entry" && styles.switchOptionTextSelected,
-            ]}
-          >
-            Entrada
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => setRegisterMode("exit")}
-          style={[
-            styles.switchOption,
-            registerMode === "exit" && styles.switchOptionSelected,
-          ]}
-        >
-          <Text
-            style={[
-              styles.switchOptionText,
-              registerMode === "exit" && styles.switchOptionTextSelected,
-            ]}
-          >
-            Salida
-          </Text>
-        </TouchableOpacity>
-      </View>
-      {errorMessage ? (
-        <View style={styles.errorMessage}>
-          <Text style={styles.errorText}>{errorMessage}</Text>
-        </View>
-      ) : null}
-      <Modal visible={loading} transparent={true}>
-        <View style={styles.modalContainer}></View>
-      </Modal>
-      <Modal visible={showConfirmation} transparent={true}>
-        <View style={styles.modalContainer}>
-          <Text style={styles.modalText}>
-            ¿Deseas registrar la lectura del vehiculo {vehicleMark}?
-          </Text>
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={styles.confirmButton}
-              onPress={confirmRegistration}
-            >
-              <Text style={styles.buttonText}>Confirmar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={cancelRegistration}
-            >
-              <Text style={styles.buttonText}>Cancelar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      
+    </View>
+  </View>
+</Modal>
+
+{/* Modal de Error */}
+<Modal visible={showError} transparent={true} animationType="fade">
+  <View style={styles.errorModalContainer}>
+    <View style={styles.errorModalContent}>
+      <Text style={styles.errorTitle}>Error</Text>
+      <Text style={styles.errorMessage}>{errorMessage}</Text>
+      <TouchableOpacity
+        style={styles.errorButton}
+        onPress={resetScanner}
+      >
+        <Text style={styles.errorButtonText}>Cerrar</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+</Modal>
+
+      {/* Escáner de QR */}
       <View style={styles.scannerContainer}>
         <Animated.View style={[styles.barcodeScanner, { flex: 1 }]}>
           <BarCodeScanner
@@ -317,11 +378,15 @@ const LectorQR = () => {
           <FocusSymbol />
         </Animated.View>
       </View>
-      {successMessage && (
-        <View style={styles.successMessage}>
-          <Text style={styles.successText}>{successMessage}</Text>
-        </View>
-      )}
+      {/* Boton para enfocar con estilos*/}
+      <TouchableOpacity
+        style={styles.enfocarbutton}
+        onPress={enfocar}
+      >
+        <Text style={styles.enfocar}>Enfocar</Text>
+        <Icon name="camera" type="material-community" size={30} color="#fff" />
+        
+      </TouchableOpacity>
     </View>
   );
 };
@@ -332,9 +397,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-start",
     paddingTop: 50,
-  },
-  titleContainer: {
-    padding: 20,
   },
   titleText: {
     fontSize: 20,
@@ -348,91 +410,173 @@ const styles = StyleSheet.create({
     height: 300,
     width: 500,
   },
-  modalContainer: {
+  // Estilos para el modal de error
+  errorModalContainer: {
     flex: 1,
-    // justifyContent: "center",
-    padding: 20,
+    justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(0, 0, 0, 0.5)",
-    paddingTop: 550,
   },
-  modalText: {
-    color: "white",
-    fontSize: 18,
+  errorModalContent: {
+    width: "80%",
+    padding: 20,
+    backgroundColor: "#ffcccc",
+    borderRadius: 10,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  errorTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#d32f2f",
+    marginBottom: 10,
+  },
+  errorMessage: {
+    fontSize: 16,
+    color: "#d32f2f",
     marginBottom: 20,
     textAlign: "center",
-    
+  },
+  errorButton: {
+    backgroundColor: "#d32f2f",
+    padding: 10,
+    borderRadius: 5,
+    width: 100,
+    alignItems: "center",
+  },
+  errorButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  // Otros estilos que ya tenías
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: "80%",
+    padding: 20,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#4a4a4a", // Color de título definido
+    marginBottom: 20,
+    borderBottomWidth: 2,
+    borderBottomColor: "#e6e6e6", // Línea debajo del título
+    paddingBottom: 10,
+  },
+  detailText: {
+    fontSize: 18,
+    color: "#666",
+    marginVertical: 8, // Más espacio entre los textos
+    paddingHorizontal: 10,
+    textAlign: "center",
+    width: "100%", // Texto centrado y ocupa todo el ancho
+  },
+  detailLabel: {
+    fontWeight: "bold",
+    color: "#333",
   },
   buttonContainer: {
     flexDirection: "row",
-    justifyContent: "space-around",
-    width: "80%",
+    justifyContent: "space-between",
+    width: "100%",
+    marginTop: 30,
   },
-  confirmButton: {
+  entryRegister: {
     backgroundColor: "#94b43b",
-    padding: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
     borderRadius: 10,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
+    width: "45%", // Ancho relativo para los botones
   },
-  cancelButton: {
-    backgroundColor: "#e74c3c",
-    padding: 10,
+  exitRegister: {
+    backgroundColor: "#f44336",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
     borderRadius: 10,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
+    width: "45%", // Ancho relativo para los botones
   },
   buttonText: {
-    color: "white",
+    color: "#fff",
     fontSize: 16,
+    fontWeight: "bold",
   },
-  successMessage: {
+  negrita: {
+    fontWeight: "bold",
+    //MAYUSCULAS
+    textTransform: "uppercase",
+  },
+  closeButton: {
     position: "absolute",
-    bottom: 20,
-    left: 20,
-    right: 20,
-    backgroundColor: "green",
-    padding: 10,
-    borderRadius: 5,
+    top: 10,
+    right: 10,
+    backgroundColor: "#f44336", // Color del fondo del botón
+    borderRadius: 15, // Hacer el botón redondeado
+    padding: 10, // Espaciado interno del botón
+    zIndex: 1, // Asegura que el botón esté por encima de otros elementos
   },
-  successText: {
-    color: "white",
+  closeButtonText: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold",
     textAlign: "center",
-    fontSize: 16,
   },
-  modeSwitch: {
-    flexDirection: "row",
+  enfocar: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  enfocarbutton: {
+    backgroundColor: "#94b43b",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 10,
     alignItems: "center",
-    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
+    width: "45%", // Ancho relativo para los botones
+    bottom: 20,
   },
-  switchText: {
-    marginRight: 10,
-    fontSize: 16,
-  },
-  switchOption: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 20,
-    marginRight: 10,
-  },
-  switchOptionSelected: {
-    backgroundColor: "#94b43b", // Color de fondo cuando está seleccionado
-    borderColor: "#94b43b", // Color de borde cuando está seleccionado
-  },
-  switchOptionText: {
-    fontSize: 14,
-  },
-  switchOptionTextSelected: {
-    color: "white", // Color del texto cuando está seleccionado
-  },
-  errorMessage: {
-    backgroundColor: "red",
-    padding: 10,
-    borderRadius: 5,
-    marginVertical: 10,
-  },
-  errorText: {
-    color: "white",
+  permisocamera: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#94b43b",
     textAlign: "center",
+    
   },
+  permisocameraDenegado: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#f44336",
+  },
+  
+  
 });
 
 export default LectorQR;

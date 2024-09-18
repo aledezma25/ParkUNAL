@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, FlatList, TouchableOpacity } from 'react-native
 import { Icon, Image, Button } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
 import { getCurrentUser } from '../functions/actions';
-import { getVehicles } from '../functions/actions';
+import { getVehicles, getVehicleTypeById } from '../functions/actions';
 import Loading from '../functions/Loading';
 import AddVehicleForm from '../internos/AddVehicleForm';
 import VehiclePlate from '../internos/VehiclePlate';
@@ -38,6 +38,7 @@ export default function VehiculosQR() {
   const logoFromFile = require('../../assets/parkun.png');
   const qrViewRef = useRef();
   const [vehicleMark, setVehicleMark] = useState("");
+  const [user, setUser] = useState(null);
 
 
   useEffect(() => {
@@ -55,27 +56,24 @@ export default function VehiculosQR() {
   };
 
   
-  //funcion para compartir QR
-  const handleShareQR = async () => {
-    try {
-      const result = await Share.share({
-        message: 'Código QR del vehículo '+ '*'+ qrText + '*',
-        url: qrText,
-      });
-      if (result.action === Share.sharedAction) {
-        if (result.activityType) {
-          console.log('Actividad compartida:', result.activityType);
-        } else {
-          console.log('Compartido');
-        }
-      }
-    } catch (error) {
-      console.error('Error al compartir:', error);
-    }
-  };
-
-
-  
+  // //funcion para compartir QR
+  // const handleShareQR = async () => {
+  //   try {
+  //     const result = await Share.share({
+  //       message: 'Código QR del vehículo '+ '*'+ qrText + '*',
+  //       url: qrText,
+  //     });
+  //     if (result.action === Share.sharedAction) {
+  //       if (result.activityType) {
+  //         console.log('Actividad compartida:', result.activityType);
+  //       } else {
+  //         console.log('Compartido');
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error('Error al compartir:', error);
+  //   }
+  // };
   
 
   useFocusEffect(
@@ -83,6 +81,7 @@ export default function VehiculosQR() {
       const fetchData = async () => {
         try {
           const currentUser = await getCurrentUser();
+          setUser(currentUser);
           if (currentUser) {
             const { success, vehicles: vehiclesData, error } = await getVehicles();
             if (success) {
@@ -134,7 +133,20 @@ export default function VehiculosQR() {
     setSelectedVehicle(vehicle);
     const vehicleMark = vehicle.mark;
     setVehicleMark(vehicleMark);
-    setQrText(vehicle.id.toString()); // Aquí puedes ajustar el texto del QR según lo que necesites
+    // Generar el texto del código QR con el id del vehículo y todods los datos
+    const qrData = {
+      id: vehicle.id,
+      plate: vehicle.plate,
+      mark: vehicle.mark,
+      color: vehicle.color,
+      nameUser: user.name,
+      lastName: user.last_name,
+      idUser: user.id,
+      //tipo de vehiculo
+      type: vehicleTypes.find(type => type.id === vehicle.idTypes).name,
+      idType: vehicle.idTypes,
+    };
+    setQrText(JSON.stringify(qrData));
     setShowQRModal(true);
   };
   
