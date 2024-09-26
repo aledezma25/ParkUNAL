@@ -10,7 +10,19 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="">
-                <div class="card">
+                
+                <br>
+                @if (Auth::check())
+                    @if (session('status'))
+                        <div class="alert alert-success" role="alert">
+                            {{ session('status') }}
+                        </div>
+                    @endif
+                    <p>{{ __('Tu rol es: ') }} {{ Auth::user()->role->name }}</p>
+                    @switch(Auth::user()->role->name)
+                    {{-- importante, si cambia o edita los roles, cambiar en esta sección --}}
+                        @case('administrador')
+                        <div class="card">
                             {{-- <a href="/home" class="btn btn-success">Actualizar</a> --}}
                     {{-- Actualizar la pagina automaticamente --}}
                     <meta http-equiv="refresh" content="60">
@@ -70,25 +82,11 @@
                         </table>
                     </div>
                 </div>
-                <br>
-                @if (Auth::check())
-                    @if (session('status'))
-                        <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
-                        </div>
-                    @endif
-                    <p>{{ __('Tu rol es: ') }} {{ Auth::user()->role->name }}</p>
-                    @switch(Auth::user()->role->name)
-                    {{-- importante, si cambia o edita los roles, cambiar en esta sección --}}
-                        @case('administrador')
-                            {{-- <a href="{{ route('administrador') }}">Ver Registros</a> --}}
                         @break
                         @case('usuarios')
                             <a href="{{ route('usuarios.index') }}">User</a>
                         @break
-                        @case('asesor')
-                            <a href="{{ route('asesor') }}">Asesor</a>
-                        @break
+                        
                         @default
                     @endswitch
                 @endif
@@ -115,4 +113,3 @@
     </script>
 @endsection
 @endsection
-

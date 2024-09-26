@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Button } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import InicioParkUN from '../home/InicioParkUN';
 import CuposIcon from '../internos/CuposIcon';
 import { useNavigation } from '@react-navigation/native';
@@ -12,15 +12,13 @@ const InicioScreen = () => {
   };
 
   return (
-    <View >
+    <View>
       <InicioParkUN />
       <CuposIcon />
       <View style={styles.container}>
-      <Button
-        title="Feed"
-        onPress={handleFeed}
-        color="#94b43b"
-      />
+        <TouchableOpacity style={styles.button} onPress={handleFeed}>
+          <Text style={styles.buttonText}>Comunidad UN</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -31,6 +29,22 @@ const styles = StyleSheet.create({
     padding: 16,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  button: {
+    backgroundColor: '#94b43b',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

@@ -46,7 +46,7 @@ const EditVehicleForm = ({ vehicle, setShowModal, toastRef, onReload }) => {
       const { mark, idTypes, color, plate, image } = formData;
 
 
-      const updatedVehicle = { ...vehicle, mark, plate, color, image, idTypes};
+      const updatedVehicle = { ...vehicle, mark, plate, color, image, idTypes}; 
       const response = await editVehicle(updatedVehicle);
       if (response.success) {
         toastRef.current.show('Vehículo actualizado correctamente');

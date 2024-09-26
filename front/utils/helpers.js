@@ -9,10 +9,10 @@ export function validateEmail(email) {
 }
 
 //URL de la API desde el backend laravel
-export const BASE_URL = 'http://192.168.137.1:8000';
+export const BASE_URL = 'http://192.168.101.8:8000';
 
 //URL del microservicio en express
-export const BASE_URL2 = 'http://192.168.137.1:3000';
+export const BASE_URL2 = 'http://192.168.101.8:3000';
 
 
 

@@ -3,8 +3,15 @@
     "packagerOpts": {
       "lan": true
     },
-    
     "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ],
       [
         "expo-barcode-scanner",
         {
@@ -12,8 +19,8 @@
         }
       ]
     ],
-    "name": "front",
-    "slug": "front",
+    "name": "ParkUN",
+    "slug": "ParkUN",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -24,15 +31,19 @@
       "backgroundColor": "#ffffff"
     },
     "assetBundlePatterns": [
-      "**/*"
+      "*/"
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.front.front"
+      "bundleIdentifier": "com.front.front",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access camera.",
+        "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone"
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#ffffff",
         "package": "com.front.front"
       },
@@ -40,11 +51,15 @@
         "CAMERA",
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE",
-        "CAMERA_FLASH"
-      ]
+        "CAMERA_FLASH",
+        "android.permission.CAMERA"
+      ],
+      "package": "com.front.front"
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
+    "extra": {
+      "eas": {
+        "projectId": "61a96d03-d3fa-4c8a-8c77-4a7d5f2d189a"
+      }
     }
   }
 }

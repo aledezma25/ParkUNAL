@@ -18,7 +18,7 @@ class CreateTypesTable extends Migration
             $table->string('name');
             $table->string('image') ->nullable();
             $table->string('description');
-            $table->integer('spaces') ->nullable();
+            $table->integer('spaces');
             $table->timestamps();
         });
     }
