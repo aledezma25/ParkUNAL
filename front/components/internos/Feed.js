@@ -16,6 +16,7 @@ import { set } from 'lodash';
 
 const pickImage = async (setSelectedImage) => {
   const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  const [loading, setLoading] = useState(false);
   if (status !== 'granted') {
     Alert.alert('Permiso necesario', 'Se requiere permiso para acceder a la galería de imágenes.');
     return;
@@ -32,6 +33,8 @@ const pickImage = async (setSelectedImage) => {
     setSelectedImage(result.assets[0].uri);
   }
 };
+
+
 
 // Función para subir una imagen al backend
 const uploadImage = async (uri) => {
@@ -159,6 +162,8 @@ const Feed = ({ navigation }) => {
   };
 
   const handleAddMessage = async () => {
+    // loading visible
+    setLoading(true);
     let imageUrl = null;
     if (selectedImage) {
       imageUrl = await uploadImage(selectedImage);
@@ -181,6 +186,7 @@ const Feed = ({ navigation }) => {
       const result = await addComment(commentData);
       if (result.status === 200) {
         console.error('Error al agregar el comentario:', result.message);
+        setLoading(false);
 
       } else {
         setNewMessage('');
@@ -191,6 +197,7 @@ const Feed = ({ navigation }) => {
         setMessages(response.data);
         
         ToastAndroid.show('Comentario agregado con éxito', ToastAndroid.SHORT);
+        setLoading(false);
       }
       console.error('Error al agregar el mensaje:', error);
     } catch (error) {
@@ -284,10 +291,11 @@ const Feed = ({ navigation }) => {
       </Modal>
       <Loading 
         isVisible={loading}
-        text='Cargando mensajes...'
+        text='Cargando...'
         timeout={10000}
       />
     </View>
+    
   );
   
 };

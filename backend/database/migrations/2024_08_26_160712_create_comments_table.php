@@ -22,7 +22,7 @@ class CreateCommentsTable extends Migration
             $table->text('message');
             $table->string('image')->nullable();
             $table->integer('reaction')->default(0);
-            $table->timestamp('date')->useCurrent();
+            $table->dateTime('date')->useCurrent();
             $table->foreign('idUser')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });

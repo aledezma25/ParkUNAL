@@ -6,9 +6,9 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 
 const RegisterScreen = () => {
   return (
-    <KeyboardAwareScrollView style={styles.container}>
+    <KeyboardAwareScrollView >
       <Image
-        source={require('../../../assets/PortadaWebBlack.png')}
+        source={require('../../../assets/logoParkUNwhite.png')}
         resizeMode='contain'
         style={styles.image}
       />
@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
     marginTop: 30,
   },
   

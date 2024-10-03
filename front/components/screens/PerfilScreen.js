@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback} from "react";
-import { useFocusEffect } from '@react-navigation/native'
+import React, { useEffect, useState, useCallback } from "react";
+import { useFocusEffect } from '@react-navigation/native';
 import { StyleSheet, Text, View, TouchableOpacity, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -14,8 +14,6 @@ const PerfilScreen = () => {
 
   useFocusEffect(
     useCallback(() => {
-      // useEffect(() => {
-      // Verificar si el usuario está logueado
       AsyncStorage.getItem("token")
         .then((token) => {
           if (token !== null) {
@@ -27,18 +25,11 @@ const PerfilScreen = () => {
         .catch((error) => {
           console.log(error);
         });
-      // }, []);
     }, [])
   );
 
-  // const handleLogout = () => {
-  //   AsyncStorage.removeItem("token");
-  //   setUserLoggedIn(false);
-  //   navigation.navigate("Account");
-  // };
-
   const handleLogout = () => {
-    const confirmLogout = Alert.alert(
+    Alert.alert(
       "¿Desea cerrar sesión?",
       "Cerrar sesión eliminará tu token y te desconectará de la aplicación.",
       [
@@ -50,21 +41,20 @@ const PerfilScreen = () => {
         {
           text: "Cerrar sesión",
           style: "destructive",
-            onPress: () => {
+          onPress: () => {
             AsyncStorage.removeItem("token");
             setUserLoggedIn(false);
             navigation.navigate("Account");
           },
         },
-      ],
+      ]
     );
   };
 
   return (
-    <View>
+    <View >
       {userLoggedIn ? (
-        // Si el usuario está registrado, muestra el contenido del perfil.
-        <View>
+        <View style={styles.profileContainer}>
           <Loading isVisible={loading} text="Cerrando sesión" />
           <Button
             title="Cerrar Sesión"
@@ -73,18 +63,23 @@ const PerfilScreen = () => {
             onPress={handleLogout}
           />
           <UserLogged />
-          
         </View>
       ) : (
-        // Si el usuario no está registrado, muestra el botón para iniciar sesión o registrarse.
-        <TouchableOpacity
-          style={styles.loginButton}
-          onPress={() => navigation.navigate("LoginScreen")}
-        >
-          <Text style={styles.loginButtonText}>
-            Iniciar Sesión o Registrarse
+        <View style={styles.container}>
+        <View style={styles.loginContainer}>
+          <Text style={styles.welcomeText}>
+            Bienvenido/a a la aplicación. Por favor, inicia sesión o regístrate para continuar.
           </Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.loginButton}
+            onPress={() => navigation.navigate("LoginScreen")}
+          >
+            <Text style={styles.loginButtonText}>
+              Iniciar Sesión o Registrarse
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
       )}
     </View>
   );
@@ -92,35 +87,56 @@ const PerfilScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    // flex: 1,
     justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f4f4f4",
+    padding: 50,
+  },
+
+  loginContainer: {
+    width: '100%',
+    padding: 20,
+    backgroundColor: "#fff",
+    borderRadius: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
     alignItems: "center",
   },
   welcomeText: {
-    fontSize: 20,
+    fontSize: 18,
+    color: "#333",
     textAlign: "center",
     marginBottom: 20,
   },
   loginButton: {
     backgroundColor: "#94b43b",
-    padding: 10,
-    borderRadius: 10,
-    margin: 10,
-    alignItems: "center",
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
+    marginVertical: 10,
   },
   loginButtonText: {
-    color: "white",
+    color: "#fff",
     fontSize: 16,
+    fontWeight: "bold",
   },
   btnCloseSession: {
-    backgroundColor: "#94b43b",
-    padding: 10,
-    borderRadius: 10,
-    margin: 10,
+    backgroundColor: "#e63946",
+    paddingVertical: 15,
   },
   btnCloseSessionText: {
-    color: "white",
+    color: "#fff",
     fontSize: 16,
+    fontWeight: "bold",
   },
 });
 

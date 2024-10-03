@@ -10,7 +10,7 @@ const LoginScreen = () => {
   return (
     <KeyboardAwareScrollView>
       <Image
-        source={require('../../../assets/PortadaWebBlack.png')}
+        source={require('../../../assets/logoParkUNwhite.png')}
         resizeMode='contain'
         style={styles.image}
       />
@@ -47,7 +47,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    // marginHorizontal: 40,
     marginTop: 30,
   },
   register: {
