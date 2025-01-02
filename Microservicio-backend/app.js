@@ -16,6 +16,7 @@ const dbConfig = {
 
 // Ruta para guardar un dato en la tabla
 app.post('/guardarVisitor', async (req, res) => {
+    console.log('Cuerpo de la solicitud:', req.body);
     try {
         const conexion = await mysql.createConnection(dbConfig);
         let { name, lastName, documentNumber, phone, mark, color, typeVehicle, plate, entryDate, exitDate } = req.body;
@@ -40,7 +41,7 @@ app.post('/guardarVisitor', async (req, res) => {
 
         res.json({ mensaje: 'Registro guardado correctamente' });
     } catch (error) {
-        console.error('Error al guardar el registro:', error.message); // Solo el mensaje del error
+        // console.error('Error al guardar el registro:', error.message); // Solo el mensaje del error
         res.status(500).json({ error: 'Error al guardar el registro', details: error.message }); // Enviar detalles del error
     }
     console.log('Datos recibidos:', req.body);
