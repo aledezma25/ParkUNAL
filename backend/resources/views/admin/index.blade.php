@@ -46,7 +46,7 @@
                         <a href="{{ route('vehicles.index') }}" class="btn btn-light mt-3">Entrar</a>
                     </div>
                     <div>
-                        <h1 class="card-footer-title">Vehiculos</h1>
+                        <h1 class="card-footer-title">Vehículos</h1>
                     </div>
                 </div>
             </div>
@@ -78,7 +78,7 @@
                         <a href="{{ route('types.index') }}" class="btn btn-light mt-3">Entrar</a>
                     </div>
                     <div>
-                        <h1 class="card-footer-title">Tipos de Vehiculos</h1>
+                        <h1 class="card-footer-title">Tipos de Vehículos</h1>
                     </div>
                 </div>
             </div>
