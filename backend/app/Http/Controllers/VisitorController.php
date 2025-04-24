@@ -1,66 +1,79 @@
 <?php
 
 namespace App\Http\Controllers;
- 
-use App\Models\Vehicle;
-use Illuminate\Http\Request;
-use App\Models\User;
-use Illuminate\Support\Facades\Http;
 
+use App\Models\User;
+use App\Models\Vehicle;
+use App\Models\Visitor;
+use Illuminate\Http\Request;
 
 class VisitorController extends Controller
 {
-    // funcion para ir a la vista de registrar visitantes
+    // Vista para registrar visitantes
+
     public function registervisited()
-    
     {
         $users = User::all();
         $vehicles = Vehicle::all();
-        return view('admin.records.index', compact('users', 'vehicles'));
+        $visitors = Visitor::all(); // Trae los registros de la base de datos local
+        return view('admin.visitors.index', compact('users', 'vehicles', 'visitors'));
     }
 
-    //funcion para ir a la vista de registrar visitantes
+
+    // Vista para crear un nuevo visitante
     public function storevisited()
     {
         $users = User::all();
         $vehicles = Vehicle::all();
-        return view('admin.records.create', compact('users', 'vehicles'));
+        return view('admin.visitors.create', compact('users', 'vehicles'));
     }
-    // Mostrar el formulario para editar un visitante
+
     public function edit($id)
     {
-        // URL del microservicio para obtener el visitante
-        $url = "http://localhost:3000/obtenerVisitor/{$id}";
-
-        // Hacer una solicitud GET al microservicio
-        $response = Http::get($url);
-
-        if ($response->successful()) {
-            $visitor = $response->json();
-            $users = User::all();
-            $vehicles = Vehicle::all();
-            
-            return view('admin.records.edit', compact('visitor', 'users', 'vehicles'));
-        } else {
-            return redirect()->route('records.index')->withErrors('No se pudo encontrar el visitante.');
-        }
+        $visitor = Visitor::findOrFail($id);
+        return view('admin.visitors.edit', compact('visitor'));
     }
 
-    // Actualizar el registro de un visitante
     public function update(Request $request, $id)
     {
-        // URL del microservicio para actualizar
-        $url = "http://localhost:3000/actualizarVisitor/{$id}";
+        $visitor = Visitor::findOrFail($id);
+        $visitor->update($request->all());
 
-        // Hacer una solicitud PUT al microservicio
-        $response = Http::put($url, $request->all());
-
-        if ($response->successful()) {
-            return redirect()->route('records.index')->with('status', 'Visitante actualizado correctamente.');
-        } else {
-            return redirect()->route('records.index')->withErrors('Error al actualizar el visitante.');
-        }
+        return redirect('/visitors')->with('success', 'Visitante actualizado correctamente.');
     }
 
-}
+    public function destroy($id)
+    {
+        // Intentamos encontrar el visitante con el ID dado
+        $visitor = Visitor::find($id);
+    
+        // Si existe, lo eliminamos
+        $visitor->delete();
 
+        // redirigimos a la vista de registros con un mensaje de éxito
+        return redirect('/visitors')->with('success', 'Visitante eliminado correctamente.');
+    }
+    
+
+
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'lastName' => 'required|string|max:255',
+            'documentNumber' => 'required|string|max:20',
+            'phone' => 'nullable|string|max:20',
+            'entryDate' => 'required|date',
+            'typeVehicle' => 'required|string|max:50',
+            'color' => 'nullable|string|max:50',
+            'mark' => 'nullable|string|max:50',
+            'exitDate' => 'nullable|date',
+            'plate' => 'nullable|string|max:20',
+        ]);
+
+        Visitor::create($request->all());
+
+        return redirect('/visitors')->with('success', 'Visitante registrado correctamente');
+    }
+}

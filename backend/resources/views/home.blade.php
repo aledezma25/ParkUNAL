@@ -3,6 +3,8 @@
 @section('css')
     <link href="https://cdn.datatables.net/2.1.3/css/dataTables.bootstrap5.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Agregar FontAwesome para los íconos -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 @endsection
 
 @section('content')
@@ -13,23 +15,32 @@
                 
                 <br>
                 @if (Auth::check())
-                    @if (session('status'))
-                        <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
-                        </div>
+                    @if (session('success'))
+                    <script>
+                        window.addEventListener('DOMContentLoaded', function() {
+                            var successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                            successModal.show();
+                        });
+                    </script>
                     @endif
-                    <p>{{ __('Tu rol es: ') }} {{ Auth::user()->role->name }}</p>
+                    {{-- <p>{{ __('Tu rol es: ') }} {{ Auth::user()->role->name }}</p> --}}
                     @switch(Auth::user()->role->name)
                     {{-- importante, si cambia o edita los roles, cambiar en esta sección --}}
                         @case('administrador')
                         <div class="card">
-                            {{-- <a href="/home" class="btn btn-success">Actualizar</a> --}}
+
                     {{-- Actualizar la pagina automaticamente --}}
                     <meta http-equiv="refresh" content="60">
                     
                     
+                    <div class="table-responsive">
+                        <a href="{{ route('records.create') }}" class="btn btn-primary mb-4 float-end" style="font-size: 12px; border-radius: 50px;">
+                            <i class="fas fa-plus-circle"></i> Nuevo Registro
+                        </a>
                     <div class="card-body">
-                        {{-- <a href="{{ route('records.registervisited') }}" class="btn btn-primary">Ver visitantes</a> --}}
+                        {{-- Botón para ir a la página de crear nuevo registro --}}
+                        
+
                         <table id="myTable" class="table table-striped table-bordered shadow-lg mt-4">
                             <thead class="table-success">
                                 <tr>
@@ -69,17 +80,45 @@
                                     <td>{{ $record->vehicle->plate }}</td>
                                     <td>{{ $record->nameAdmin }}</td>
 
-                                    <td>
-                                        <form action="{{ route('records.destroy', $record->id) }}" method="POST">
+                                    {{-- <td>
+                                        <a href="{{ route('records.edit', $record->id) }}" class="btn btn-warning mb-1">
+                                            <i class="fas fa-edit"></i> Editar
+                                        </a>
+                                        
+                                        <form action="{{ route('records.destroy', $record->id) }}" method="POST" style="display:inline;">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                                            <button type="submit" class="btn btn-danger">
+                                                <i class="fas fa-trash-alt"></i> Eliminar
+                                            </button>
                                         </form>
+                                    </td> --}}
+                                    <td>
+                                        <a href="{{ route('records.edit', $record->id) }}"
+                                            class="btn btn-sm btn-outline-primary" title="Editar">
+                                            <i class="fas fa-pen"></i>
+                                        </a>
+                                        <a href="{{ route('records.destroy', $record->id) }}"
+                                            class="btn btn-sm btn-outline-danger" title="Eliminar"
+                                            onclick="event.preventDefault(); 
+                                            if(confirm('¿Estás seguro de eliminar este registro?')) { document.getElementById('delete-form-{{ $record->id }}').submit(); }">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+
+                                        <form id="delete-form-{{ $record->id }}"
+                                            action="{{ route('records.destroy', $record->id) }}" method="POST"
+                                            style="display: none;">
+                                            @csrf
+                                            @method('DELETE')
+                                        </form>
+
                                     </td>
+                                    
                                 </tr>
                                 @endforeach
                             </tbody>
                         </table>
+                    </div>
                     </div>
                 </div>
                         @break
@@ -93,6 +132,9 @@
             </div>
         </div>
     </div>
+
+    
+    
 
     @section('js')
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>

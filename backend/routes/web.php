@@ -47,7 +47,7 @@ Route::middleware(['auth', 'role:administrador'])->group(function () {
     // Route::get('productos-pdf', [ProductController::class, 'generarPDF'])->name('productos-pdf');
     // Route::get('categorias-pdf', [CategoryController::class, 'generarPDF'])->name('categorias-pdf');
     // Route::get('usuarios-pdf', [UsersController::class, 'generarPDF'])->name('usuarios-pdf');
-    
+
     //gestion de usuarios
     Route::get('/usuarios', [UsersController::class, 'index'])->name('usuarios.index');
     Route::post("usuarios", [UsersController::class, 'store'])->name('usuarios.store');
@@ -60,8 +60,8 @@ Route::middleware(['auth', 'role:administrador'])->group(function () {
     Route::put("usuarios/{id}", [UsersController::class, 'updateWeb'])->name('usuarios.updateWeb');
 
 
-   
-    
+
+
 
     //gestion de roles
     Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
@@ -99,24 +99,34 @@ Route::middleware(['auth', 'role:administrador'])->group(function () {
 
 
     //gestion de records
-    Route::get('/records', [RecordController::class, 'index'])->name('records.index'); 
-    Route::post("records", [RecordController::class, 'store'])->name('records.store');
-    Route::get("records/{id}", [RecordController::class, 'edit'])->name('records.edit');
+    // Route::get('/records', [RecordController::class, 'index'])->name('records.index');
+    // Route::get("records/{id}", [RecordController::class, 'edit'])->name('records.edit');
     Route::delete("records/{id}", [RecordController::class, 'destroy'])->name('records.destroy');
-    
+    Route::get('records/create', [RecordController::class, 'create'])->name('records.create');
+
+    Route::post('/records', [RecordController::class, 'store'])->name('records.store');
+
+    Route::get('/records/{id}/edit', [RecordController::class, 'edit'])->name('records.edit');
+    Route::put('/records/{id}', [RecordController::class, 'update'])->name('records.update');
+    Route::get('/records', [RecordController::class, 'index'])->name('records.index');
+
+    // Rutas para búsqueda dinámica
+    Route::get('/records/vehicles/{document}', [RecordController::class, 'getUserVehicles'])->name('records.getUserVehicles');
+
+
+
+
     //Ruta ir a la vista de registrar visitantes
-    Route::get("/records", [VisitorController::class, 'registervisited'])->name('records.registervisited');
+    Route::get("/visitors", [VisitorController::class, 'registervisited'])->name('visitors.registervisited');
     //Ruta para registrar visitantes
     Route::get("/recordsvisitor", [VisitorController::class, 'storevisited'])->name('recordsvisitor');
-    
-    // // Ruta para editar un visitante
-    // Route::get('/records/{id}/edit', [VisitorController::class, 'edit'])->name('records.edit');
+    Route::post('/visitors', [VisitorController::class, 'store'])->name('visitors.store');
 
-    // // Ruta para actualizar un visitante
-    // Route::put('/records/{id}', [VisitorController::class, 'update'])->name('records.update');
+    // Ruta para eliminar un registro de visitante
+    Route::delete("visitors/{id}", [VisitorController::class, 'destroy'])->name('visitors.destroy');
 
-    
-    
+    Route::get('/visitors/{id}/edit', [VisitorController::class, 'edit'])->name('visitors.edit');
+    Route::put('/visitors/{id}', [VisitorController::class, 'update'])->name('visitors.update');
 });
 
 Route::middleware(['auth', 'role:usuario'])->group(function () {
@@ -128,3 +138,6 @@ Route::middleware(['auth', 'role:usuario'])->group(function () {
 Auth::routes();
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
+Route::get('/downloadparkun', function () {
+    return view('downloadparkun');
+});

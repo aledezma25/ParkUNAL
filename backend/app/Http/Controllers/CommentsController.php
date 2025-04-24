@@ -19,9 +19,10 @@ class CommentsController extends Controller
             'idUser' => 'required|integer',
             'nameUser' => 'required|string',
             'lastNameUser' => 'required|string',
-            'photoURL' => 'required|string',
+            'photoURL' => 'nullable|string',
             'message' => 'required|string',
             'reaction' => 'required|integer',
+            'image' => 'nullable|string',
         ]);
         $comment = new Comment();
         $comment->idUser = $request->idUser;

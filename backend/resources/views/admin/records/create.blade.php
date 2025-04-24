@@ -1,102 +1,86 @@
-@section('content')
 @extends('layouts.app')
 
-<div class="container my-5 p-4" style="background-color: #f9f9f9; border-radius: 10px;">
-    <a href="/records" class="btn btn-secondary mb-4" style="padding: 10px 20px; font-weight: bold; border-radius: 50px;">Regresar</a>
+@section('content')
+<div class="container mt-5" style="max-width: 800px;">
+    <a href="/home" class="btn btn-secondary mb-4" style="padding: 10px 20px; font-weight: bold; border-radius: 50px; background-color: #6c757d;">Regresar</a>
     <div class="text-center mb-4">
-        <h1 style="font-family: 'Helvetica', sans-serif; font-weight: bold; color: #444;">Registro de Entrada de Visitantes</h1>
+        <h1 style="font-family: 'Arial', sans-serif; font-weight: bold; color: #343a40;">Registrar Nuevo Registro</h1>
     </div>
-    <div class="card" style="border: none; border-radius: 12px; box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);">
+
+    <div class="card shadow-sm" style="border-radius: 10px; background-color: #f8f9fa;">
         <div class="card-body p-4">
-            <form id="visitorForm">
+            <form method="GET" action="{{ route('records.create') }}">
                 @csrf
                 <div class="mb-3 row">
-                    <label for="name" class="col-md-2 col-form-label" style="font-weight: bold; color: #555;">Nombre</label>
-                    <div class="col-md-4">
-                        <input type="text" name="name" id="name" class="form-control" placeholder="Nombre" style="border-radius: 8px; border-color: #ccc;" required>
-                    </div>
-                    <label for="lastName" class="col-md-2 col-form-label" style="font-weight: bold; color: #555;">Apellido</label>
-                    <div class="col-md-4">
-                        <input type="text" name="lastName" id="lastName" class="form-control" placeholder="Apellido" style="border-radius: 8px; border-color: #ccc;" required>
+                    <label for="document_number" class="col-md-4 col-form-label text-md-end" style="font-weight: bold; color: #495057;">Número de Documento</label>
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" id="document_number" name="document_number"
+                            value="{{ old('document_number') }}" required style="border-radius: 8px; border-color: #ced4da;">
                     </div>
                 </div>
                 <div class="mb-3 row">
-                    <label for="documentNumber" class="col-md-2 col-form-label" style="font-weight: bold; color: #555;">Cédula</label>
-                    <div class="col-md-4">
-                        <input type="text" name="documentNumber" id="documentNumber" class="form-control" placeholder="Cédula" style="border-radius: 8px; border-color: #ccc;" required>
+                    <div class="col-md-6 offset-md-4">
+                        <button type="submit" class="btn btn-primary" style="padding: 10px 30px; font-size: 16px; border-radius: 50px;">Buscar Usuario</button>
                     </div>
-                    <label for="phone" class="col-md-2 col-form-label" style="font-weight: bold; color: #555;">Teléfono</label>
-                    <div class="col-md-4">
-                        <input type="text" name="phone" id="phone" class="form-control" placeholder="Teléfono" style="border-radius: 8px; border-color: #ccc;">
-                    </div>
-                </div>
-                <div class="mb-3 row">
-                    <label for="entryDate" class="col-md-2 col-form-label" style="font-weight: bold; color: #555;">Hora de entrada</label>
-                    <div class="col-md-4">
-                        <input type="datetime-local" name="entryDate" id="entryDate" class="form-control" style="border-radius: 8px; border-color: #ccc;" required>
-                    </div>
-                    <label for="typeVehicle" class="col-md-2 col-form-label" style="font-weight: bold; color: #555;">Vehículo</label>
-                    <div class="col-md-4">
-                        <input type="text" name="typeVehicle" id="typeVehicle" class="form-control" placeholder="Tipo de Vehículo" style="border-radius: 8px; border-color: #ccc;" required>
-                    </div>
-                </div>
-                <div class="mb-3 row">
-                    <label for="color" class="col-md-2 col-form-label" style="font-weight: bold; color: #555;">Color</label>
-                    <div class="col-md-4">
-                        <input type="text" name="color" id="color" class="form-control" placeholder="Color" style="border-radius: 8px; border-color: #ccc;">
-                    </div>
-                    <label for="mark" class="col-md-2 col-form-label" style="font-weight: bold; color: #555;">Marca</label>
-                    <div class="col-md-4">
-                        <input type="text" name="mark" id="mark" class="form-control" placeholder="Marca" style="border-radius: 8px; border-color: #ccc;">
-                    </div>
-                </div>
-                <div class="mb-3 row">
-                    <label for="exitDate" class="col-md-2 col-form-label" style="font-weight: bold; color: #555;">Hora de salida</label>
-                    <div class="col-md-4">
-                        <input type="datetime-local" name="exitDate" id="exitDate" class="form-control" style="border-radius: 8px; border-color: #ccc;">
-                    </div>
-                    <label for="plate" class="col-md-2 col-form-label" style="font-weight: bold; color: #555;">Placa</label>
-                    <div class="col-md-4">
-                        <input type="text" name="plate" id="plate" class="form-control" placeholder="Placa" style="border-radius: 8px; border-color: #ccc;">
-                    </div>
-                </div>
-                <div class="text-center mt-4">
-                    <button type="submit" class="btn btn-primary" style="background-color: #28a745; border-color: #28a745; padding: 10px 30px; border-radius: 50px; font-size: 16px;">Registrar</button>
                 </div>
             </form>
+
+            @if ($user)
+                <hr>
+                <h3 class="text-center" style="font-weight: bold; color: #343a40;">Usuario Encontrado: {{ $user->name }} {{ $user->last_name }}</h3>
+
+                <form method="POST" action="{{ route('records.store') }}">
+                    @csrf
+                    <input type="hidden" name="user_id" value="{{ $user->id }}"> <!-- Este es el user_id -->
+
+                    <!-- Seleccionar Vehículo -->
+                    <div class="mb-3 row">
+                        <label for="vehicle_id" class="col-md-4 col-form-label text-md-end" style="font-weight: bold; color: #495057;">Seleccionar Vehículo</label>
+                        <div class="col-md-6">
+                            <select name="vehicle_id" class="form-control" required style="border-radius: 8px; border-color: #ced4da;">
+                                @foreach ($vehicles as $vehicle)
+                                    <option value="{{ $vehicle->id }}">
+                                        {{ $vehicle->mark }} - {{ $vehicle->plate }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Campos de fecha y hora de entrada automáticamente -->
+                    <div class="mb-3 row">
+                        <label for="entryDate" class="col-md-4 col-form-label text-md-end" style="font-weight: bold; color: #495057;">Fecha de Entrada</label>
+                        <div class="col-md-6">
+                            <input type="date" class="form-control" id="entryDate" name="entryDate"
+                                value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}" readonly required style="border-radius: 8px; border-color: #ced4da;">
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="entryTime" class="col-md-4 col-form-label text-md-end" style="font-weight: bold; color: #495057;">Hora de Entrada</label>
+                        <div class="col-md-6">
+                            <input type="time" class="form-control" id="entryTime" name="entryTime"
+                                value="{{ \Carbon\Carbon::now()->format('H:i') }}" readonly required style="border-radius: 8px; border-color: #ced4da;">
+                        </div>
+                    </div>
+
+                    <!-- Nombre del Vigilante (admin que registra el vehículo) -->
+                    <div class="mb-3 row">
+                        <label for="nameAdmin" class="col-md-4 col-form-label text-md-end" style="font-weight: bold; color: #495057;">Nombre del Vigilante</label>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="nameAdmin" name="nameAdmin"
+                                value="{{ Auth::user()->name }}" readonly style="border-radius: 8px; border-color: #ced4da;">
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <div class="col-md-6 offset-md-4">
+                            <button type="submit" class="btn btn-success" style="padding: 10px 30px; font-size: 16px; border-radius: 50px;">Registrar</button>
+                        </div>
+                    </div>
+                </form>
+            @endif
         </div>
     </div>
 </div>
-
-<script>
-    document.getElementById('visitorForm').addEventListener('submit', function(event) {
-        event.preventDefault();
-        const formData = new FormData(this);
-        const data = {};
-        formData.forEach((value, key) => {
-            data[key] = value;
-        });
-
-        fetch('http://localhost:3000/guardarVisitor', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-        })
-        .then(response => response.json())
-        .then(result => {
-            if (result.mensaje) {
-                alert(result.mensaje);
-                window.location.href = '/records'; // Redirige a la página de visitantes
-            } else {
-                alert('Error al guardar el registro');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error al guardar el registro');
-        });
-    });
-</script>
 @endsection

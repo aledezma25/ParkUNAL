@@ -14,6 +14,7 @@
         <a href="{{ route('createRole') }}" class="btn btn-success">Nuevo Rol</a>
     </div>
     <br>
+    <div class="table-responsive">
     <div class="container">
         <table id="rolesTable" class="table table-striped table-bordered shadow-lg mt-4">
             <thead class="table-success">
@@ -40,6 +41,7 @@
                 @endforeach
             </tbody>
         </table>
+    </div>
     </div>
 </div>
 @endsection

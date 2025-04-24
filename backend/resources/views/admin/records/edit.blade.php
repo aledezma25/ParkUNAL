@@ -1,71 +1,89 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container my-5 p-4" style="background-color: #f9f9f9; border-radius: 10px;">
-    <a href="/records" class="btn btn-secondary mb-4" style="padding: 10px 20px; font-weight: bold; border-radius: 50px;">Regresar</a>
+<div class="container mt-5" style="max-width: 800px;">
+    <a href="{{ route('home') }}" class="btn btn-secondary mb-4" style="padding: 10px 20px; font-weight: bold; border-radius: 50px; background-color: #6c757d;">Regresar</a>
+    
     <div class="text-center mb-4">
-        <h1 style="font-family: 'Helvetica', sans-serif; font-weight: bold; color: #444;">Editar Visitante</h1>
+        <h1 style="font-weight: bold; color: #343a40;">Editar Registro</h1>
     </div>
-    <div class="card" style="border: none; border-radius: 12px; box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);">
+    
+    <div class="card shadow-sm" style="border-radius: 10px; background-color: #f8f9fa;">
         <div class="card-body p-4">
-            <form action="{{ route('records.update', $visitor['id']) }}" method="POST">
+            <form action="{{ route('records.update', $record->id) }}" method="POST">
                 @csrf
                 @method('PUT')
+
+                {{-- Usuario --}}
                 <div class="mb-3 row">
-                    <label for="name" class="col-md-2 col-form-label" style="font-weight: bold; color: #555;">Nombre</label>
-                    <div class="col-md-4">
-                        <input type="text" name="name" id="name" class="form-control" placeholder="Nombre" style="border-radius: 8px; border-color: #ccc;" value="{{ $visitor['name'] }}" required>
-                    </div>
-                    <label for="lastName" class="col-md-2 col-form-label" style="font-weight: bold; color: #555;">Apellido</label>
-                    <div class="col-md-4">
-                        <input type="text" name="lastName" id="lastName" class="form-control" placeholder="Apellido" style="border-radius: 8px; border-color: #ccc;" value="{{ $visitor['lastName'] }}" required>
+                    <label for="user_id" class="col-md-4 col-form-label text-md-end" style="font-weight: bold; color: #495057;">Usuario</label>
+                    <div class="col-md-6">
+                        <select name="user_id" id="user_id" class="form-select" style="border-radius: 8px;">
+                            @foreach($users as $user)
+                                <option value="{{ $user->id }}" {{ $record->idUser == $user->id ? 'selected' : '' }}>
+                                    {{ $user->name }} {{ $user->last_name }} - {{ $user->document_number }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
+
+                {{-- Vehículo --}}
                 <div class="mb-3 row">
-                    <label for="documentNumber" class="col-md-2 col-form-label" style="font-weight: bold; color: #555;">Cédula</label>
-                    <div class="col-md-4">
-                        <input type="text" name="documentNumber" id="documentNumber" class="form-control" placeholder="Cédula" style="border-radius: 8px; border-color: #ccc;" value="{{ $visitor['documentNumber'] }}" required>
-                    </div>
-                    <label for="phone" class="col-md-2 col-form-label" style="font-weight: bold; color: #555;">Teléfono</label>
-                    <div class="col-md-4">
-                        <input type="text" name="phone" id="phone" class="form-control" placeholder="Teléfono" style="border-radius: 8px; border-color: #ccc;" value="{{ $visitor['phone'] }}">
+                    <label for="vehicle_id" class="col-md-4 col-form-label text-md-end" style="font-weight: bold; color: #495057;">Vehículo</label>
+                    <div class="col-md-6">
+                        <select name="vehicle_id" id="vehicle_id" class="form-select" style="border-radius: 8px;">
+                            @foreach($vehicles as $vehicle)
+                                <option value="{{ $vehicle->id }}" {{ $record->idVehicle == $vehicle->id ? 'selected' : '' }}>
+                                    {{ $vehicle->type->name }} - {{ $vehicle->plate }} ({{ $vehicle->color }} / {{ $vehicle->mark }})
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
+
+                {{-- Hora de Entrada --}}
                 <div class="mb-3 row">
-                    <label for="entryDate" class="col-md-2 col-form-label" style="font-weight: bold; color: #555;">Hora de entrada</label>
-                    <div class="col-md-4">
-                        <input type="datetime-local" name="entryDate" id="entryDate" class="form-control" style="border-radius: 8px; border-color: #ccc;" value="{{ $visitor['entryDate'] }}" required>
-                    </div>
-                    <label for="typeVehicle" class="col-md-2 col-form-label" style="font-weight: bold; color: #555;">Vehículo</label>
-                    <div class="col-md-4">
-                        <input type="text" name="typeVehicle" id="typeVehicle" class="form-control" placeholder="Tipo de Vehículo" style="border-radius: 8px; border-color: #ccc;" value="{{ $visitor['typeVehicle'] }}" required>
+                    <label for="entryTime" class="col-md-4 col-form-label text-md-end" style="font-weight: bold; color: #495057;">Hora de Entrada</label>
+                    <div class="col-md-6">
+                        <input type="time" name="entryTime" class="form-control" value="{{ $record->entryTime }}" style="border-radius: 8px;" required>
                     </div>
                 </div>
+
+                {{-- Fecha de Entrada --}}
                 <div class="mb-3 row">
-                    <label for="color" class="col-md-2 col-form-label" style="font-weight: bold; color: #555;">Color</label>
-                    <div class="col-md-4">
-                        <input type="text" name="color" id="color" class="form-control" placeholder="Color" style="border-radius: 8px; border-color: #ccc;" value="{{ $visitor['color'] }}">
-                    </div>
-                    <label for="mark" class="col-md-2 col-form-label" style="font-weight: bold; color: #555;">Marca</label>
-                    <div class="col-md-4">
-                        <input type="text" name="mark" id="mark" class="form-control" placeholder="Marca" style="border-radius: 8px; border-color: #ccc;" value="{{ $visitor['mark'] }}">
+                    <label for="entryDate" class="col-md-4 col-form-label text-md-end" style="font-weight: bold; color: #495057;">Fecha de Entrada</label>
+                    <div class="col-md-6">
+                        <input type="date" name="entryDate" class="form-control" value="{{ $record->entryDate }}" style="border-radius: 8px;" required>
                     </div>
                 </div>
+
+                {{-- Hora de Salida --}}
                 <div class="mb-3 row">
-                    <label for="exitDate" class="col-md-2 col-form-label" style="font-weight: bold; color: #555;">Hora de salida</label>
-                    <div class="col-md-4">
-                        <input type="datetime-local" name="exitDate" id="exitDate" class="form-control" style="border-radius: 8px; border-color: #ccc;" value="{{ $visitor['exitDate'] }}">
-                    </div>
-                    <label for="plate" class="col-md-2 col-form-label" style="font-weight: bold; color: #555;">Placa</label>
-                    <div class="col-md-4">
-                        <input type="text" name="plate" id="plate" class="form-control" placeholder="Placa" style="border-radius: 8px; border-color: #ccc;" value="{{ $visitor['plate'] }}">
+                    <label for="exitTime" class="col-md-4 col-form-label text-md-end" style="font-weight: bold; color: #495057;">Hora de Salida</label>
+                    <div class="col-md-6">
+                        <input type="time" name="exitTime" class="form-control" value="{{ $record->exitTime }}" style="border-radius: 8px;">
                     </div>
                 </div>
-                <div class="text-center mt-4">
-                    <button type="submit" class="btn btn-primary" style="background-color: #28a745; border-color: #28a745; padding: 10px 30px; border-radius: 50px; font-size: 16px;">Actualizar</button>
+
+                {{-- Vigilante --}}
+                <div class="mb-3 row">
+                    <label for="nameAdmin" class="col-md-4 col-form-label text-md-end" style="font-weight: bold; color: #495057;">Nombre del Vigilante</label>
+                    <div class="col-md-6">
+                        <input type="text" name="nameAdmin" class="form-control" value="{{ $record->nameAdmin }}" style="border-radius: 8px;" required>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" class="btn btn-success" style="padding: 10px 30px; font-size: 16px; border-radius: 50px;">Guardar Cambios</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+@endsection
+
+@section('js')
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 @endsection

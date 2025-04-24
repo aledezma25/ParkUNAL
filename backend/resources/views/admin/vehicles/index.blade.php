@@ -14,6 +14,7 @@
 
         </div>
         <br>
+        <div class="table-responsive">
         <div class="container">
             <table id="vehiclesTable" class="table table-striped table-bordered shadow-lg mt-4">
                 <thead class="table-success">
@@ -47,6 +48,7 @@
                 </tbody>
             </table>
         </div>
+        </div> 
     </div>
 @endsection
 

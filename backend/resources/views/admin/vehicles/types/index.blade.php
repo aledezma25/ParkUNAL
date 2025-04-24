@@ -14,6 +14,7 @@
         <a href="{{ route('createType') }}" class="btn btn-success">Nuevo Tipo de Vehículo</a>
     </div>
     <br>
+    <div class="table-responsive">
     <div class="container">
         <table id="typesTable" class="table table-striped table-bordered shadow-lg mt-4">
             <thead class="table-success">
@@ -48,6 +49,7 @@
                 @endforeach
             </tbody>
         </table>
+    </div>
     </div>
 </div>
 @endsection
