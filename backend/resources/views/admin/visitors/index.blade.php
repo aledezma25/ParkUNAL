@@ -12,8 +12,8 @@
             <div class="">
                 <div class="card">
                     <div class="card-body">
-                        <a href="/administrador" class="btn btn-primary">Regresar</a>
-                        <a href="/recordsvisitor" class="btn btn-success">Nuevo visitante</a>
+                        <a href="{{ route('administrador') }}" class="btn btn-primary">Regresar</a>
+                        <a href="{{ route('recordsvisitor') }}" class="btn btn-success">Nuevo visitante</a>
                         @if (session('success'))
                             <script>
                                 window.addEventListener('DOMContentLoaded', function() {

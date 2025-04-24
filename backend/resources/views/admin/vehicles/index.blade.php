@@ -9,7 +9,7 @@
     <div class="container">
         <h2>Gestión de vehículos</h2>
         <div class="container text-left">
-            <a href="/administrador" class="btn btn-primary">Regresar</a>
+            <a href="{{ route('administrador') }}" class="btn btn-primary">Regresar</a>
             <a href="{{ route('createVehi') }}" class="btn btn-success">Nuevo Vehículo</a>
 
         </div>

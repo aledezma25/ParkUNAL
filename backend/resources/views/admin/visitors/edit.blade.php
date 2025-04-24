@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container my-5 p-4" style="background-color: #f9f9f9; border-radius: 10px;">
-    <a href="/visitors" class="btn btn-secondary mb-4" style="padding: 10px 20px; font-weight: bold; border-radius: 50px;">Regresar</a>
+    <a href="{{ route('visitors.registervisited') }}" class="btn btn-secondary mb-4" style="padding: 10px 20px; font-weight: bold; border-radius: 50px;">Regresar</a>
     <div class="text-center mb-4">
         <h1 style="font-family: 'Helvetica', sans-serif; font-weight: bold; color: #444;">Editar Visitante</h1>
     </div>

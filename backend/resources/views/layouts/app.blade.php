@@ -165,7 +165,7 @@
                     <!-- Menú Izquierdo -->
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="/administrador">Panel Administrativo</a>
+                            <a class="nav-link" href="{{ route('administrador') }}">Panel Administrativo</a>
                         </li>
                     </ul>
 

@@ -9,7 +9,7 @@
 <div class="container">
     <h2>Gestión de tipos de vehículos</h2>
     <div class="container text-left">
-        <a href="/administrador" class="btn btn-primary">Regresar</a>
+        <a href="{{ route('administrador') }}" class="btn btn-primary">Regresar</a>
 
         <a href="{{ route('createType') }}" class="btn btn-success">Nuevo Tipo de Vehículo</a>
     </div>

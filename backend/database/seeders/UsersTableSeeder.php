@@ -40,6 +40,16 @@ class UsersTableSeeder extends Seeder
                 'phone_number' => '',
                 'email' => 'vtabaresm@unal.edu.co',
                 'password' => Hash::make('vtabaresm'), // Hasheando la contraseña
+            ],
+            [
+                'role_id' => 1,
+                'name' => 'Maria Isabel',
+                'last_name' => 'Aristizabal',
+                'document_number' => '',
+                'address' => 'Manizales, Caldas',
+                'phone_number' => '',
+                'email' => 'maristizabalm@unal.edu.co',
+                'password' => Hash::make('maristizabalm'), // Hasheando la contraseña
             ]
         ]);
     }

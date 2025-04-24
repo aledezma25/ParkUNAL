@@ -18,7 +18,7 @@ class CreateCommentsTable extends Migration
             $table->unsignedBigInteger('idUser');
             $table->string('nameUser');
             $table->string('lastNameUser');
-            $table->string('photoURL');
+            $table->string('photoURL')->nullable();
             $table->text('message');
             $table->string('image')->nullable();
             $table->integer('reaction')->default(0);

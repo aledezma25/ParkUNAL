@@ -9,7 +9,7 @@
 <div class="container">
     <h2>Gestión de roles</h2>
     <div class="container text-left">
-        <a href="/administrador" class="btn btn-primary">Regresar</a>
+        <a href="{{ route('administrador') }}" class="btn btn-primary">Regresar</a>
 
         <a href="{{ route('createRole') }}" class="btn btn-success">Nuevo Rol</a>
     </div>

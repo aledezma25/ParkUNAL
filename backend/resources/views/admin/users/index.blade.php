@@ -9,7 +9,7 @@
     <div class="container">
         <h2>Gestión de usuarios</h2>
         <div class="container text-left">
-            <a href="/administrador" class="btn btn-primary">Regresar</a>
+            <a href="{{ route('administrador') }}" class="btn btn-primary">Regresar</a>
 
             <a href="{{ route('create') }}" class="btn btn-success">Nuevo Usuario</a>
         </div>

@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container mt-5" style="max-width: 800px;">
-    <a href="/administrador" class="btn btn-secondary mb-4" style="padding: 10px 20px; font-weight: bold; border-radius: 50px; background-color: #6c757d;">Regresar</a>
+    <a href="{{ route('vehicles.index') }}" class="btn btn-secondary mb-4" style="padding: 10px 20px; font-weight: bold; border-radius: 50px; background-color: #6c757d;">Regresar</a>
     <div class="text-center mb-4">
         <h1 style="font-family: 'Arial', sans-serif; font-weight: bold; color: #343a40;">Registrar nuevo Vehículos</h1>
     </div>
